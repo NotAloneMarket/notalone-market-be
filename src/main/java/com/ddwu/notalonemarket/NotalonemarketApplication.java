@@ -1,13 +1,13 @@
-package com.ddwu.notalonemarget;
+package com.ddwu.notalonemarket;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class NotalonemargetApplication {
+public class NotalonemarketApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(NotalonemargetApplication.class, args);
+		SpringApplication.run(NotalonemarketApplication.class, args);
 	}
 
 }
