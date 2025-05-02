@@ -9,3 +9,4 @@ public interface ChatRoomService {
     ChatRoomDTO enterChatRoom(Integer roomId, String userId);
     void completeTransaction(Integer roomId, String userId);
 }
+
