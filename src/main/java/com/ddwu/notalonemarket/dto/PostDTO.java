@@ -4,35 +4,40 @@ public class PostDTO {
     private Long id;
     private String title;
     private String description;
-    private Long categoryId;
     private Integer totalAmount;
+    private Integer totalQuantity;
     private Integer myQuantity;
     private Integer pricePerItem;
     private Integer participantLimit;
-    private String productURL;
-    private String imageURL;
+    private String productUrl;
+    private String imageUrl;
     private String status;
-    private String writerNickname;
+    private String categoryName; // ← 추가됨
+    private Long writerId;
 
-    public PostDTO() {}
-
-    public PostDTO(Long id, String title, String description, Long categoryId, Integer totalAmount, Integer myQuantity,
-                   Integer pricePerItem, Integer participantLimit, String productURL, String imageURL, String status,
-                   String writerNickname) {
+    // 생성자 (Post 엔티티 → DTO 변환 시 사용)
+    public PostDTO(Long id, String title, String description, Integer totalAmount, Integer totalQuantity,
+                   Integer myQuantity, Integer pricePerItem, Integer participantLimit,
+                   String productUrl, String imageUrl, String status, String categoryName, Long writerId) {
         this.id = id;
         this.title = title;
         this.description = description;
-        this.categoryId = categoryId;
         this.totalAmount = totalAmount;
+        this.totalQuantity = totalQuantity;
         this.myQuantity = myQuantity;
         this.pricePerItem = pricePerItem;
         this.participantLimit = participantLimit;
-        this.productURL = productURL;
-        this.imageURL = imageURL;
+        this.productUrl = productUrl;
+        this.imageUrl = imageUrl;
         this.status = status;
-        this.writerNickname = writerNickname;
+        this.categoryName = categoryName;
+        this.writerId = writerId;
     }
 
+    // 기본 생성자
+    public PostDTO() {}
+
+    // Getters and Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
@@ -42,11 +47,11 @@ public class PostDTO {
     public String getDescription() { return description; }
     public void setDescription(String description) { this.description = description; }
 
-    public Long getCategoryId() { return categoryId; }
-    public void setCategoryId(Long categoryId) { this.categoryId = categoryId; }
-
     public Integer getTotalAmount() { return totalAmount; }
     public void setTotalAmount(Integer totalAmount) { this.totalAmount = totalAmount; }
+
+    public Integer getTotalQuantity() { return totalQuantity; }
+    public void setTotalQuantity(Integer totalQuantity) { this.totalQuantity = totalQuantity; }
 
     public Integer getMyQuantity() { return myQuantity; }
     public void setMyQuantity(Integer myQuantity) { this.myQuantity = myQuantity; }
@@ -57,15 +62,18 @@ public class PostDTO {
     public Integer getParticipantLimit() { return participantLimit; }
     public void setParticipantLimit(Integer participantLimit) { this.participantLimit = participantLimit; }
 
-    public String getProductURL() { return productURL; }
-    public void setProductURL(String productURL) { this.productURL = productURL; }
+    public String getProductUrl() { return productUrl; }
+    public void setProductUrl(String productUrl) { this.productUrl = productUrl; }
 
-    public String getImageURL() { return imageURL; }
-    public void setImageURL(String imageURL) { this.imageURL = imageURL; }
+    public String getImageUrl() { return imageUrl; }
+    public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
 
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }
 
-    public String getWriterNickname() { return writerNickname; }
-    public void setWriterNickname(String writerNickname) { this.writerNickname = writerNickname; }
+    public String getCategoryName() { return categoryName; }
+    public void setCategoryName(String categoryName) { this.categoryName = categoryName; }
+
+    public Long getWriterId() { return writerId; }
+    public void setWriterId(Long writerId) { this.writerId = writerId; }
 }

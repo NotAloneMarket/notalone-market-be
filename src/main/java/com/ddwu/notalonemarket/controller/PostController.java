@@ -1,45 +1,43 @@
 package com.ddwu.notalonemarket.controller;
 
+import com.ddwu.notalonemarket.domain.Post;
 import com.ddwu.notalonemarket.dto.PostDTO;
 import com.ddwu.notalonemarket.service.PostService;
-import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/posts")
+@RequestMapping("/posts")
 public class PostController {
 
     @Autowired
     private PostService postService;
 
-    @PostMapping
-    public ResponseEntity<Long> createPost(@RequestBody PostDTO postDTO) {
-        Long postId = postService.createPost(postDTO);
-        return ResponseEntity.ok(postId);
+    @PostMapping("/write")
+    public Long createPost(@RequestBody Post post) {
+        return postService.createPost(post);
     }
 
-    @GetMapping
-    public ResponseEntity<List<PostDTO>> getAllPosts() {
-        return ResponseEntity.ok(postService.getAllPosts());
+    @GetMapping("")
+    public List<PostDTO> getAllPosts() {
+        return postService.getAllPosts();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<PostDTO> getPostDetail(@PathVariable Long id) {
-        return ResponseEntity.ok(postService.getPostDetail(id));
+    public PostDTO getPostDetail(@PathVariable Long id) {
+        return postService.getPostDetail(id);
     }
 
     @PostMapping("/{id}/complete")
-    public ResponseEntity<String> completePost(@PathVariable Long id) {
-        return ResponseEntity.ok(postService.completePost(id));
+    public String completePost(@PathVariable Long id) {
+        postService.completePost(id);
+        return "success";
     }
 
     @GetMapping("/my")
-    public ResponseEntity<List<PostDTO>> getMyPosts(HttpSession session) {
-        Long userId = (Long) session.getAttribute("loginUserId");
-        return ResponseEntity.ok(postService.getMyPosts(userId));
+    public List<PostDTO> getMyPosts(@RequestParam Long writerId) {
+        return postService.getMyPosts(writerId);
     }
 }

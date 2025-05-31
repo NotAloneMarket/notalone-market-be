@@ -1,52 +1,69 @@
 package com.ddwu.notalonemarket.service;
 
+import com.ddwu.notalonemarket.domain.Category;
 import com.ddwu.notalonemarket.domain.Post;
 import com.ddwu.notalonemarket.dto.PostDTO;
+import com.ddwu.notalonemarket.repository.CategoryRepository;
+import com.ddwu.notalonemarket.repository.PostRepository;
+
+import jakarta.transaction.Transactional;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
 public class PostService {
 
-    public Long createPost(PostDTO postDTO) {
-        Post post = toEntity(postDTO);
-        return Post.save(post);
+    @Autowired
+    private PostRepository postRepository;
+
+    @Autowired
+    private CategoryRepository categoryRepository;
+
+    public Long createPost(Post post) {
+        return postRepository.save(post).getId();
     }
 
     public List<PostDTO> getAllPosts() {
-        return Post.findAll().stream().map(this::toDTO).collect(Collectors.toList());
+        return postRepository.findAll().stream()
+                .map(post -> {
+                    String categoryName = getCategoryName(post.getCategoryId());
+                    return post.toDTO(categoryName);
+                })
+                .collect(Collectors.toList());
     }
 
-    public PostDTO getPostDetail(Long postId) {
-        return toDTO(Post.findById(postId));
+    public PostDTO getPostDetail(Long id) {
+        Optional<Post> postOpt = postRepository.findById(id);
+        return postOpt.map(post -> {
+            String categoryName = getCategoryName(post.getCategoryId());
+            return post.toDTO(categoryName);
+        }).orElse(null);
     }
 
-    public String completePost(Long postId) {
-        Post.updatePostStatusToComplete(postId);
-        return "완료되었습니다";
+    public void completePost(Long id) {
+        postRepository.findById(id).ifPresent(post -> {
+            post.setStatus("SOLD");
+            postRepository.save(post);
+        });
     }
 
-    public List<PostDTO> getMyPosts(Long userId) {
-        return Post.findByUserId(userId).stream().map(this::toDTO).collect(Collectors.toList());
+    public List<PostDTO> getMyPosts(Long writerId) {
+        return postRepository.findByWriterId(writerId).stream()
+                .map(post -> {
+                    String categoryName = getCategoryName(post.getCategoryId());
+                    return post.toDTO(categoryName);
+                })
+                .collect(Collectors.toList());
     }
 
-    private PostDTO toDTO(Post post) {
-        return new PostDTO(
-                post.getId(), post.getTitle(), post.getDescription(), post.getCategoryId(),
-                post.getTotalAmount(), post.getMyQuantity(), post.getPricePerItem(),
-                post.getParticipantLimit(), post.getProductURL(), post.getImageURL(),
-                post.getStatus(), post.getWriterNickname()
-        );
-    }
-
-    private Post toEntity(PostDTO dto) {
-        return new Post(
-                null, dto.getTitle(), dto.getDescription(), dto.getCategoryId(),
-                dto.getTotalAmount(), dto.getMyQuantity(), dto.getPricePerItem(),
-                dto.getParticipantLimit(), dto.getProductURL(), dto.getImageURL(),
-                dto.getStatus(), dto.getWriterNickname()
-        );
+    private String getCategoryName(Long categoryId) {
+        return categoryRepository.findById(categoryId)
+                .map(Category::getName)
+                .orElse("기타");
     }
 }

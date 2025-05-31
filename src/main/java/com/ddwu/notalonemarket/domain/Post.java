@@ -1,102 +1,104 @@
 package com.ddwu.notalonemarket.domain;
 
-import java.util.*;
-import java.util.concurrent.atomic.AtomicLong;
+import com.ddwu.notalonemarket.dto.PostDTO;
+import jakarta.persistence.*;
 
+
+@Entity
+@Table(name = "Post")
 public class Post {
-    private Long id;
+
+	@Id
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "post_seq_gen")
+	@SequenceGenerator(name = "post_seq_gen", sequenceName = "SEQ_POST", allocationSize = 1)
+	@Column(name = "id", updatable = false, nullable = false)
+	private Long id;
+
+
     private String title;
+
+    @Lob
     private String description;
-    private Long categoryId;
+
     private Integer totalAmount;
+    private Integer totalQuantity;
     private Integer myQuantity;
     private Integer pricePerItem;
     private Integer participantLimit;
-    private String productURL;
-    private String imageURL;
+    private String productUrl;
+    private String imageUrl;
     private String status;
-    private String writerNickname;
 
-    // 내부 DB설정
-    private static final Map<Long, Post> POST_DB = new HashMap<>();
-    private static final AtomicLong ID_GENERATOR = new AtomicLong(1);
+    @Column(name = "category_id")
+    private Long categoryId;
+
+    @Column(name = "writer_id")
+    private Long writerId;
 
     public Post() {}
 
-    public Post(Long id, String title, String description, Long categoryId, Integer totalAmount, Integer myQuantity,
-                Integer pricePerItem, Integer participantLimit, String productURL, String imageURL, String status,
-                String writerNickname) {
+    public Post(Long id, String title, String description, Integer totalAmount, Integer totalQuantity,
+                Integer myQuantity, Integer pricePerItem, Integer participantLimit, String productUrl,
+                String imageUrl, String status, Long categoryId, Long writerId) {
         this.id = id;
         this.title = title;
         this.description = description;
-        this.categoryId = categoryId;
         this.totalAmount = totalAmount;
+        this.totalQuantity = totalQuantity;
         this.myQuantity = myQuantity;
         this.pricePerItem = pricePerItem;
         this.participantLimit = participantLimit;
-        this.productURL = productURL;
-        this.imageURL = imageURL;
+        this.productUrl = productUrl;
+        this.imageUrl = imageUrl;
         this.status = status;
-        this.writerNickname = writerNickname;
+        this.categoryId = categoryId;
+        this.writerId = writerId;
     }
+
+    public PostDTO toDTO(String categoryName) {
+        return new PostDTO(id, title, description, totalAmount, totalQuantity, myQuantity,
+                pricePerItem, participantLimit, productUrl, imageUrl, status,
+                categoryName, writerId);
+    }
+
+    // Getters and Setters
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
+
     public String getTitle() { return title; }
     public void setTitle(String title) { this.title = title; }
+
     public String getDescription() { return description; }
     public void setDescription(String description) { this.description = description; }
-    public Long getCategoryId() { return categoryId; }
-    public void setCategoryId(Long categoryId) { this.categoryId = categoryId; }
+
     public Integer getTotalAmount() { return totalAmount; }
     public void setTotalAmount(Integer totalAmount) { this.totalAmount = totalAmount; }
+
+    public Integer getTotalQuantity() { return totalQuantity; }
+    public void setTotalQuantity(Integer totalQuantity) { this.totalQuantity = totalQuantity; }
+
     public Integer getMyQuantity() { return myQuantity; }
     public void setMyQuantity(Integer myQuantity) { this.myQuantity = myQuantity; }
+
     public Integer getPricePerItem() { return pricePerItem; }
     public void setPricePerItem(Integer pricePerItem) { this.pricePerItem = pricePerItem; }
+
     public Integer getParticipantLimit() { return participantLimit; }
     public void setParticipantLimit(Integer participantLimit) { this.participantLimit = participantLimit; }
-    public String getProductURL() { return productURL; }
-    public void setProductURL(String productURL) { this.productURL = productURL; }
-    public String getImageURL() { return imageURL; }
-    public void setImageURL(String imageURL) { this.imageURL = imageURL; }
+
+    public String getProductUrl() { return productUrl; }
+    public void setProductUrl(String productUrl) { this.productUrl = productUrl; }
+
+    public String getImageUrl() { return imageUrl; }
+    public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
+
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }
-    public String getWriterNickname() { return writerNickname; }
-    public void setWriterNickname(String writerNickname) { this.writerNickname = writerNickname; }
 
-    //아직 user없으니까 임시 메소드
-    public static Long save(Post post) {
-        Long newId = ID_GENERATOR.getAndIncrement();
-        post.setId(newId);
-        POST_DB.put(newId, post);
-        return newId;
-    }
+    public Long getCategoryId() { return categoryId; }
+    public void setCategoryId(Long categoryId) { this.categoryId = categoryId; }
 
-    public static List<Post> findAll() {
-        return new ArrayList<>(POST_DB.values());
-    }
-
-    public static Post findById(Long postId) {
-        return POST_DB.get(postId);
-    }
-
-    public static void updatePostStatusToComplete(Long postId) {
-        Post post = POST_DB.get(postId);
-        if (post != null) {
-            post.setStatus("COMPLETED");
-        }
-    }
-
-    public static List<Post> findByUserId(Long userId) {
-        // 실제 DB에서는 작성자 ID 기준으로!! 지금은 닉네임 기준
-        String nickname = "user" + userId;
-        List<Post> result = new ArrayList<>();
-        for (Post post : POST_DB.values()) {
-            if (nickname.equals(post.getWriterNickname())) {
-                result.add(post);
-            }
-        }
-        return result;
-    }
+    public Long getWriterId() { return writerId; }
+    public void setWriterId(Long writerId) { this.writerId = writerId; }
 }
