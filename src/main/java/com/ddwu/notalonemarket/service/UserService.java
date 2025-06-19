@@ -62,4 +62,11 @@ public class UserService {
         user.setPassword(passwordEncoder.encode(newPw));
         return userRepository.save(user);
     }
+    
+    public Long findUserIdByLoginId(String loginId) {
+        return userRepository.findByLoginId(loginId)
+                             .map(User::getUserId)
+                             .orElse(null);
+    }
+
 }
