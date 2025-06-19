@@ -1,6 +1,6 @@
 package com.ddwu.notalonemarket.service;
 
-import com.ddwu.notalonemarket.dto.BuyHistoryDTO;
+import com.ddwu.notalonemarket.dto.BuyHistoryResponseDTO;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -10,21 +10,13 @@ import java.util.List;
 @Service
 public class BuyHistoryService {
 
-    private static final List<BuyHistoryDTO> dummyData = new ArrayList<>();
+    public List<BuyHistoryResponseDTO> getBuyHistory(Long userId) {
+        List<BuyHistoryResponseDTO> list = new ArrayList<>();
 
-    static {
-        dummyData.add(new BuyHistoryDTO(1L, 1001L, 2001L, 2, LocalDateTime.now().minusDays(2)));
-        dummyData.add(new BuyHistoryDTO(2L, 1002L, 2002L, 1, LocalDateTime.now().minusDays(1)));
-        dummyData.add(new BuyHistoryDTO(3L, 1001L, 2003L, 3, LocalDateTime.now()));
-    }
-
-    public List<BuyHistoryDTO> getBuyHistory(Long userId) {
-        List<BuyHistoryDTO> result = new ArrayList<>();
-        for (BuyHistoryDTO dto : dummyData) {
-            if (dto.getUserId().equals(userId)) {
-                result.add(dto);
-            }
+        // 더미 데이터 예시
+        if (userId == 1001L) {
+            list.add(new BuyHistoryResponseDTO(1L, "쉐이크 공동구매", 2000, 2, LocalDateTime.of(2025, 5, 20, 15, 0), "/img/shake.png"));
         }
-        return result;
+        return list;
     }
 }

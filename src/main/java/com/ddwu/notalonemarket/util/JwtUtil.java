@@ -28,6 +28,17 @@ public class JwtUtil {
             return null;
         }
     }
+    
+    // 사용자 정보 추출 메서드
+    public String extractLoginId(String token) {
+        return Jwts.parserBuilder()
+                .setSigningKey(secretKey)
+                .build()
+                .parseClaimsJws(token)
+                .getBody()
+                .getSubject();
+    }
+
 
     
     public String generateToken(String loginId) {
