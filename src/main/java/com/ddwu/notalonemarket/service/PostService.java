@@ -66,4 +66,27 @@ public class PostService {
                 .map(Category::getName)
                 .orElse("기타");
     }
+    
+    public List<PostDTO> searchPostsByKeyword(String keyword) {
+        return postRepository
+                .findByTitleContainingIgnoreCaseOrDescriptionContainingIgnoreCase(keyword, keyword)
+                .stream()
+                .map(post -> {
+                    String categoryName = getCategoryName(post.getCategoryId());
+                    return post.toDTO(categoryName);
+                })
+                .collect(Collectors.toList());
+    }
+    
+    public List<PostDTO> filterPostsByCategory(String categoryName) {
+        return postRepository
+                .findByCategoryName(categoryName)
+                .stream()
+                .map(post -> {
+                    String resolvedCategoryName = getCategoryName(post.getCategoryId());
+                    return post.toDTO(resolvedCategoryName);
+                })
+                .collect(Collectors.toList());
+    }
+
 }

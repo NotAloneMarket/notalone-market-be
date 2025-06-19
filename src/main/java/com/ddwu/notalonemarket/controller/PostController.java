@@ -40,4 +40,18 @@ public class PostController {
     public List<PostDTO> getMyPosts(@RequestParam Long writerId) {
         return postService.getMyPosts(writerId);
     }
+    
+    // keyword 파라미터가 있을 경우 검색
+    @GetMapping(params = "keyword")
+    public List<PostDTO> searchPostsByKeyword(@RequestParam String keyword) {
+        return postService.searchPostsByKeyword(keyword);
+    }
+
+    // category 파라미터가 있을 경우 필터링
+    @GetMapping(params = "category")
+    public List<PostDTO> filterPostsByCategory(@RequestParam String category) {
+        return postService.filterPostsByCategory(category);
+    }
+
+
 }

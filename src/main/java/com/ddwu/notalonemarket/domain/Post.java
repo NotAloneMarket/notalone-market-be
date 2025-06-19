@@ -17,7 +17,7 @@ public class Post {
 
     private String title;
 
-    @Lob
+    @Column(length = 2000)
     private String description;
 
     private Integer totalAmount;
