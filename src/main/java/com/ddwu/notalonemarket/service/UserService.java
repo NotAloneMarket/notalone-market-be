@@ -1,45 +1,65 @@
 package com.ddwu.notalonemarket.service;
+
 import com.ddwu.notalonemarket.domain.User;
-import com.ddwu.notalonemarket.domain.UserDAO;
-import com.ddwu.notalonemarket.dto.UserDTO;
+import com.ddwu.notalonemarket.repository.UserRepository;
+import com.ddwu.notalonemarket.util.JwtUtil;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Optional;
 
 @Service
 public class UserService {
 
     @Autowired
-    private UserDAO userDAO;
+    private UserRepository userRepository;
 
-    // 사용자 등록
-    @Transactional
-    public UserDTO registerUser(UserDTO userDTO) {
-        User user = new User(userDTO.getUsername(), userDTO.getEmail(), userDTO.getPassword(), userDTO.getNickname());
-        user = userDAO.save(user);
-        return toDTO(user);
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+    
+    @Autowired
+    private JwtUtil jwtUtil;
+    
+    public String loginAndGetToken(String loginId, String rawPw) {
+        Optional<User> userOpt = userRepository.findByLoginId(loginId);
+        if (userOpt.isPresent() && passwordEncoder.matches(rawPw, userOpt.get().getPassword())) {
+            return jwtUtil.generateToken(loginId);
+        }
+        throw new IllegalArgumentException("Invalid credentials");
     }
 
-    // 이메일로 사용자 조회
-    public UserDTO getUserByEmail(String email) {
-        User user = userDAO.findByEmail(email);
-        return toDTO(user);
+    public User register(User user) {
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        return userRepository.save(user);
     }
 
-    // 사용자 이름으로 사용자 조회
-    public UserDTO getUserByUsername(String username) {
-        User user = userDAO.findByUsername(username);
-        return toDTO(user);
+    public Optional<User> login(String loginId, String rawPw) {
+        Optional<User> optUser = userRepository.findByLoginId(loginId);
+        if (optUser.isPresent()) {
+            User user = optUser.get();
+            System.out.println("rawPw = " + rawPw);
+            System.out.println("encodedPw = " + user.getPassword());
+            System.out.println("match = " + passwordEncoder.matches(rawPw, user.getPassword()));
+        }
+        return optUser.filter(user -> passwordEncoder.matches(rawPw, user.getPassword()));
     }
 
-    // 사용자 삭제
-    @Transactional
-    public void deleteUser(Long id) {
-        userDAO.deleteById(id);
+
+    public User updateProfile(Long userId, String newPhone, String newAccount) {
+        User user = userRepository.findById(userId).orElseThrow();
+        user.setPhoneNum(newPhone);
+        user.setAccountNumber(newAccount);
+        return userRepository.save(user);
     }
 
- // User 엔티티를 UserDTO로 변환
-    private UserDTO toDTO(User user) {
-        return new UserDTO(user.getUsername(), user.getEmail(), user.getPassword(), user.getNickname());
+    public User changePassword(Long userId, String currentPw, String newPw) {
+        User user = userRepository.findById(userId).orElseThrow();
+        if (!passwordEncoder.matches(currentPw, user.getPassword())) {
+            throw new IllegalArgumentException("현재 비밀번호가 일치하지 않습니다.");
+        }
+        user.setPassword(passwordEncoder.encode(newPw));
+        return userRepository.save(user);
     }
 }

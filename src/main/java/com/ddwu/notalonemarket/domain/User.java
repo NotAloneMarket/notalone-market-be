@@ -1,56 +1,54 @@
 package com.ddwu.notalonemarket.domain;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
+import java.time.LocalDateTime;
 
 @Entity
+@Table(name = "users")
 public class User {
 
 	@Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id; 
-    
-    private String username;  // 사용자 이름
-    private String email;  // 이메일
-    private String password;  // 비밀번호
-    private String nickname;  // 닉네임
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "user_seq_gen")
+    @SequenceGenerator(name = "user_seq_gen", sequenceName = "SEQ_USER", allocationSize = 1)
+    @Column(name = "user_id")
+    private Long userId;
+	
+    @Column(nullable = false, unique = true, length = 20)
+    private String loginId;
 
-    // 기본 생성자
-    public User() {}
+    @Column(nullable = false, length = 100)
+    private String password;
 
-    // 생성자
-    public User(String username, String email, String password, String nickname) {
-        this.username = username;
-        this.email = email;
-        this.password = password;
-        this.nickname = nickname;
+    @Column(nullable = false, length = 20)
+    private String nickname;
+
+    @Column(nullable = false, length = 20)
+    private String role = "USER";
+
+    @Column(length = 12)
+    private String phoneNum;
+
+    private String accountNumber;
+
+    private LocalDateTime deletedAt;
+
+    private LocalDateTime createAt = LocalDateTime.now();
+
+    // Getters & Setters
+    public Long getUserId() {
+        return userId;
     }
 
-    // Getter and Setter methods
-    public Long getId() {
-        return id;
+    public void setUserId(Long userId) {
+        this.userId = userId;
     }
 
-    public void setId(Long id) {
-        this.id = id;
+    public String getLoginId() {
+        return loginId;
     }
 
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
+    public void setLoginId(String loginId) {
+        this.loginId = loginId;
     }
 
     public String getPassword() {
@@ -67,5 +65,45 @@ public class User {
 
     public void setNickname(String nickname) {
         this.nickname = nickname;
+    }
+
+    public String getRole() {
+        return role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
+    }
+
+    public String getPhoneNum() {
+        return phoneNum;
+    }
+
+    public void setPhoneNum(String phoneNum) {
+        this.phoneNum = phoneNum;
+    }
+
+    public String getAccountNumber() {
+        return accountNumber;
+    }
+
+    public void setAccountNumber(String accountNumber) {
+        this.accountNumber = accountNumber;
+    }
+
+    public LocalDateTime getDeletedAt() {
+        return deletedAt;
+    }
+
+    public void setDeletedAt(LocalDateTime deletedAt) {
+        this.deletedAt = deletedAt;
+    }
+
+    public LocalDateTime getCreateAt() {
+        return createAt;
+    }
+
+    public void setCreateAt(LocalDateTime createAt) {
+        this.createAt = createAt;
     }
 }
