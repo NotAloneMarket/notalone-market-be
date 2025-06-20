@@ -5,13 +5,14 @@ import com.ddwu.notalonemarket.domain.User;
 import com.ddwu.notalonemarket.dto.PostDTO;
 import com.ddwu.notalonemarket.repository.UserRepository;
 import com.ddwu.notalonemarket.service.PostService;
+
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import com.ddwu.notalonemarket.util.JwtUtil;
 
 import jakarta.servlet.http.HttpServletRequest;
-
-import java.util.List;
 
 @CrossOrigin(origins = "http://localhost:5173")
 @RestController
@@ -28,6 +29,7 @@ public class PostController {
     private UserRepository userRepository;
 
 
+    // 게시글 작성 (이미지 포함)
     @PostMapping("/write")
     public Long createPost(@RequestBody Post post, HttpServletRequest request) {
         // 1. JWT 토큰에서 loginId 추출
@@ -56,33 +58,34 @@ public class PostController {
         return postService.getAllPosts();
     }
 
+    // 단일 게시글 상세 조회
     @GetMapping("/{id}")
     public PostDTO getPostDetail(@PathVariable Long id) {
         return postService.getPostDetail(id);
     }
 
+    // 게시글 상태 완료 처리
     @PostMapping("/{id}/complete")
     public String completePost(@PathVariable Long id) {
         postService.completePost(id);
         return "success";
     }
 
+    // 특정 작성자의 게시글 조회
     @GetMapping("/my")
     public List<PostDTO> getMyPosts(@RequestParam Long writerId) {
         return postService.getMyPosts(writerId);
     }
-    
-    // keyword 파라미터가 있을 경우 검색
+
+    // 키워드로 검색
     @GetMapping(params = "keyword")
     public List<PostDTO> searchPostsByKeyword(@RequestParam String keyword) {
         return postService.searchPostsByKeyword(keyword);
     }
 
-    // category 파라미터가 있을 경우 필터링
+    // 카테고리로 필터링
     @GetMapping(params = "category")
     public List<PostDTO> filterPostsByCategory(@RequestParam String category) {
         return postService.filterPostsByCategory(category);
     }
-
-
 }

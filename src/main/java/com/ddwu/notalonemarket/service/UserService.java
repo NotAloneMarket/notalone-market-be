@@ -18,10 +18,10 @@ public class UserService {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
-    
+
     @Autowired
     private JwtUtil jwtUtil;
-    
+
     public String loginAndGetToken(String loginId, String rawPw) {
         Optional<User> userOpt = userRepository.findByLoginId(loginId);
         if (userOpt.isPresent() && passwordEncoder.matches(rawPw, userOpt.get().getPassword())) {
@@ -46,11 +46,22 @@ public class UserService {
         return optUser.filter(user -> passwordEncoder.matches(rawPw, user.getPassword()));
     }
 
-
+    // 기존 방식 (전화번호 + 계좌번호만 변경)
     public User updateProfile(Long userId, String newPhone, String newAccount) {
         User user = userRepository.findById(userId).orElseThrow();
         user.setPhoneNum(newPhone);
         user.setAccountNumber(newAccount);
+        return userRepository.save(user);
+    }
+
+    // 이미지 포함 프로필 업데이트용 오버로딩
+    public User updateProfile(Long userId, String nickname, String phoneNum, String profileImageUrl) {
+        User user = userRepository.findById(userId).orElseThrow();
+
+        if (nickname != null) user.setNickname(nickname);
+        if (phoneNum != null) user.setPhoneNum(phoneNum);
+        if (profileImageUrl != null) user.setProfileImageUrl(profileImageUrl);
+
         return userRepository.save(user);
     }
 
@@ -62,7 +73,7 @@ public class UserService {
         user.setPassword(passwordEncoder.encode(newPw));
         return userRepository.save(user);
     }
-    
+
     public Long findUserIdByLoginId(String loginId) {
         return userRepository.findByLoginId(loginId)
                              .map(User::getUserId)
@@ -73,5 +84,11 @@ public class UserService {
                              .map(User::getNickname)
                              .orElse("알 수 없음");
     }
+    
+    public User findByLoginId(String loginId) {
+        Optional<User> optionalUser = userRepository.findByLoginId(loginId);
+        return optionalUser.orElse(null); // 없으면 null 반환 (Controller에서 처리 가능)
+    }
+
 
 }
