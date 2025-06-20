@@ -4,6 +4,7 @@ import com.ddwu.notalonemarket.domain.Post;
 import com.ddwu.notalonemarket.domain.User;
 import com.ddwu.notalonemarket.dto.PostDTO;
 import com.ddwu.notalonemarket.repository.UserRepository;
+import com.ddwu.notalonemarket.service.ChatRoomService;
 import com.ddwu.notalonemarket.service.PostService;
 import com.ddwu.notalonemarket.service.UserService;
 
@@ -11,6 +12,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -38,6 +40,9 @@ public class PostController {
     
     @Autowired
 	private UserService userService;
+
+    @Autowired
+    private ChatRoomService chatRoomService;
 
 
     // 게시글 작성 (이미지 포함)
@@ -145,4 +150,17 @@ public class PostController {
     public List<PostDTO> filterPostsByCategory(@RequestParam String category) {
         return postService.filterPostsByCategory(category);
     }
+    
+    //채팅방 id로 postDTO 찾기
+    @GetMapping("/from-chatroom/{chatRoomId}")
+    public ResponseEntity<?> getPostByChatRoomId(@PathVariable Long chatRoomId) {
+        try {
+            Long postId = chatRoomService.getPostIdByChatRoomId(chatRoomId);
+            PostDTO postDTO = postService.getPostDTOById(postId);
+            return ResponseEntity.ok(postDTO);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", e.getMessage()));
+        }
+    }
+
 }

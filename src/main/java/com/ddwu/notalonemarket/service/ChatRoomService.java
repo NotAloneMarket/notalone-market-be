@@ -42,5 +42,11 @@ public class ChatRoomService {
 
         chatRoomRepository.save(room);
     }
+    
+    public Long getPostIdByChatRoomId(Long chatRoomId) {
+        ChatRoom room = chatRoomRepository.findById(chatRoomId)
+            .orElseThrow(() -> new IllegalArgumentException("채팅방을 찾을 수 없습니다. ID: " + chatRoomId));
+        return room.getPostId();
+    }
 
 }
