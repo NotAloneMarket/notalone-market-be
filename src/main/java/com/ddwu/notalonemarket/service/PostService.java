@@ -2,6 +2,7 @@ package com.ddwu.notalonemarket.service;
 
 import com.ddwu.notalonemarket.domain.Category;
 import com.ddwu.notalonemarket.domain.Post;
+import com.ddwu.notalonemarket.domain.User;
 import com.ddwu.notalonemarket.dto.PostDTO;
 import com.ddwu.notalonemarket.repository.CategoryRepository;
 import com.ddwu.notalonemarket.repository.PostRepository;
@@ -40,11 +41,21 @@ public class PostService {
 
     public PostDTO getPostDetail(Long id) {
         Optional<Post> postOpt = postRepository.findById(id);
+
         return postOpt.map(post -> {
             String categoryName = getCategoryName(post.getCategoryId());
-            return post.toDTO(categoryName);
+            PostDTO dto = post.toDTO(categoryName);
+
+            // 👇 작성자 닉네임을 직접 세팅
+            User user = post.getUser(); // Post 엔티티에 getUser()가 있다면
+            if (user != null) {
+                dto.setNickname(user.getNickname());
+            }
+
+            return dto;
         }).orElse(null);
     }
+
 
     public void completePost(Long id) {
         postRepository.findById(id).ifPresent(post -> {

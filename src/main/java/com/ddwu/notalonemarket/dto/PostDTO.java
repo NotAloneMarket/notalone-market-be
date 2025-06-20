@@ -14,6 +14,8 @@ public class PostDTO {
     private String status;
     private String categoryName;
     private Long writerId;
+    private String nickname; // 추가
+
 
     // 생성자 (Post 엔티티 → DTO 변환 시 사용)
     public PostDTO(Long id, String title, String description, Integer totalAmount, Integer totalQuantity,
@@ -38,6 +40,15 @@ public class PostDTO {
     public PostDTO() {}
 
     // Getters and Setters
+    
+    public String getNickname() {
+        return nickname;
+    }
+
+    public void setNickname(String nickname) {
+        this.nickname = nickname;
+    }
+
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
