@@ -1,5 +1,6 @@
 package com.ddwu.notalonemarket.controller;
 
+import com.ddwu.notalonemarket.domain.User;
 import com.ddwu.notalonemarket.dto.BuyHistoryResponseDTO;
 import com.ddwu.notalonemarket.service.BuyHistoryService;
 import com.ddwu.notalonemarket.service.UserService;
@@ -28,14 +29,27 @@ public class BuyHistoryController {
     private UserService userService;
     
     @PostMapping("/create")
-    public ResponseEntity<String> createBuyHistory(@RequestParam Long userId) {
+    public ResponseEntity<String> createBuyHistory(@RequestHeader("Authorization") String authHeader) {
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token");
+        }
+
+        String token = authHeader.substring(7);
+        String loginId = jwtUtil.extractLoginId(token);
+
+        User user = userService.findByLoginId(loginId);
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
+        }
+
         try {
-            buyHistoryService.createBuyHistoryForUser(userId);
+            buyHistoryService.createBuyHistoryForUser(user.getUserId());
             return ResponseEntity.ok("Buy history created.");
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
     }
+
 
     @GetMapping
     public ResponseEntity<?> getBuyHistory(@RequestHeader("Authorization") String authHeader) {

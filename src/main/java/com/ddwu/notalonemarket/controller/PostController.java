@@ -5,10 +5,13 @@ import com.ddwu.notalonemarket.domain.User;
 import com.ddwu.notalonemarket.dto.PostDTO;
 import com.ddwu.notalonemarket.repository.UserRepository;
 import com.ddwu.notalonemarket.service.PostService;
+import com.ddwu.notalonemarket.service.UserService;
 
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import com.ddwu.notalonemarket.util.JwtUtil;
 
@@ -27,6 +30,9 @@ public class PostController {
 
     @Autowired
     private UserRepository userRepository;
+    
+    @Autowired
+	private UserService userService;
 
 
     // 게시글 작성 (이미지 포함)
@@ -71,11 +77,24 @@ public class PostController {
         return "success";
     }
 
-    // 특정 작성자의 게시글 조회
     @GetMapping("/my")
-    public List<PostDTO> getMyPosts(@RequestParam Long writerId) {
-        return postService.getMyPosts(writerId);
+    public ResponseEntity<?> getMyPosts(@RequestHeader("Authorization") String authHeader) {
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token");
+        }
+
+        String token = authHeader.substring(7);
+        String loginId = jwtUtil.extractLoginId(token);
+
+        User user = userService.findByLoginId(loginId);
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
+        }
+
+        List<PostDTO> myPosts = postService.getMyPosts(user.getUserId());
+        return ResponseEntity.ok(myPosts);
     }
+
 
     // 키워드로 검색
     @GetMapping(params = "keyword")
