@@ -21,75 +21,86 @@ import java.util.UUID;
 @RequestMapping("/user")
 public class UserController {
 
-    @Autowired
-    private UserService userService;
+	@Autowired
+	private UserService userService;
 
-    @Autowired
-    private JwtUtil jwtUtil;
+	@Autowired
+	private JwtUtil jwtUtil;
 
-    @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody UserRegisterDTO dto) {
-        User user = new User();
-        user.setLoginId(dto.getLoginId());
-        user.setPassword(dto.getPassword());
-        user.setNickname(dto.getNickname());
-        user.setPhoneNum(dto.getPhoneNum());
-        user.setAccountNumber(dto.getAccountNumber());
+	@PostMapping("/register")
+	public ResponseEntity<?> register(@RequestBody UserRegisterDTO dto) {
+		User user = new User();
+		user.setLoginId(dto.getLoginId());
+		user.setPassword(dto.getPassword());
+		user.setNickname(dto.getNickname());
+		user.setPhoneNum(dto.getPhoneNum());
+		user.setAccountNumber(dto.getAccountNumber());
 
-        User saved = userService.register(user);
-        return ResponseEntity.created(URI.create("/users/" + saved.getUserId())).build();
-    }
+		User saved = userService.register(user);
+		return ResponseEntity.created(URI.create("/users/" + saved.getUserId())).build();
+	}
 
-    @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody Map<String, String> body) {
-        String loginId = body.get("loginId");
-        String password = body.get("password");
+	@PostMapping("/login")
+	public ResponseEntity<?> login(@RequestBody Map<String, String> body) {
+		String loginId = body.get("loginId");
+		String password = body.get("password");
 
-        return userService.login(loginId, password)
-                .map(user -> {
-                    String token = jwtUtil.generateToken(user.getLoginId());
-                    return ResponseEntity.ok(Map.of(
-                            "token", token,
-                            "userId", user.getUserId()
-                    ));
-                })
-                .orElse(ResponseEntity.status(401).body(Map.of("error", "Invalid credentials")));
-    }
+		return userService.login(loginId, password).map(user -> {
+			String token = jwtUtil.generateToken(user.getLoginId());
+			return ResponseEntity.ok(Map.of("token", token, "userId", user.getUserId()));
+		}).orElse(ResponseEntity.status(401).body(Map.of("error", "Invalid credentials")));
+	}
 
-    // 프로필 정보 수정 (닉네임/폰번호 + 프로필 이미지)
-    @PutMapping("/profile")
-    public ResponseEntity<?> updateProfile(
-            @RequestParam Long userId,
-            @RequestParam(required = false) String nickname,
-            @RequestParam(required = false) String phoneNum,
-            @RequestParam(required = false) MultipartFile profileImage
+	// 프로필 정보 수정 (닉네임/폰번호 + 프로필 이미지)
+	@PutMapping("/profile")
+	public ResponseEntity<?> updateProfile(@RequestParam Long userId, @RequestParam(required = false) String nickname,
+			@RequestParam(required = false) String phoneNum, @RequestParam(required = false) MultipartFile profileImage
 
-    ) {
-        try {
-            String imageUrl = null;
+	) {
+		try {
+			String imageUrl = null;
 
-            if (profileImage != null && !profileImage.isEmpty()) {
-                String fileName = UUID.randomUUID() + "_" + profileImage.getOriginalFilename();
-                String uploadDir = System.getProperty("user.home") + "/notalonemarket/uploads/";
-                File dest = new File(uploadDir + fileName);
-                dest.getParentFile().mkdirs();
-                profileImage.transferTo(dest);
-                imageUrl = "/uploads/" + fileName;
-            }
+			if (profileImage != null && !profileImage.isEmpty()) {
+				String fileName = UUID.randomUUID() + "_" + profileImage.getOriginalFilename();
+				String uploadDir = System.getProperty("user.home") + "/notalonemarket/uploads/";
+				File dest = new File(uploadDir + fileName);
+				dest.getParentFile().mkdirs();
+				profileImage.transferTo(dest);
+				imageUrl = "/uploads/" + fileName;
+			}
 
-            userService.updateProfile(userId, nickname, phoneNum, imageUrl);
-            return ResponseEntity.ok(Map.of("message", "Profile updated successfully"));
+			userService.updateProfile(userId, nickname, phoneNum, imageUrl);
+			return ResponseEntity.ok(Map.of("message", "Profile updated successfully"));
 
-        } catch (IOException e) {
-            e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(Map.of("error", "프로필 수정 실패", "message", e.getMessage()));
-        }
-    }
+		} catch (IOException e) {
+			e.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+					.body(Map.of("error", "프로필 수정 실패", "message", e.getMessage()));
+		}
+	}
 
-    @PutMapping("/password")
-    public ResponseEntity<?> changePassword(@RequestParam Long userId, @RequestBody Map<String, String> body) {
-        userService.changePassword(userId, body.get("currentPw"), body.get("newPw"));
-        return ResponseEntity.ok(Map.of("message", "Password changed successfully"));
-    }
+	@PutMapping("/password")
+	public ResponseEntity<?> changePassword(@RequestParam Long userId, @RequestBody Map<String, String> body) {
+		userService.changePassword(userId, body.get("currentPw"), body.get("newPw"));
+		return ResponseEntity.ok(Map.of("message", "Password changed successfully"));
+	}
+
+	@GetMapping("/me")
+	public ResponseEntity<?> getMyInfo(@RequestHeader("Authorization") String authHeader) {
+		if (!authHeader.startsWith("Bearer ")) {
+			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token");
+		}
+
+		String token = authHeader.substring(7);
+		String loginId = jwtUtil.extractLoginId(token); // 토큰에서 loginId 추출
+
+		User user = userService.findByLoginId(loginId);
+		if (user == null) {
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
+		}
+
+		return ResponseEntity.ok(Map.of("userId", user.getUserId(), "nickname", user.getNickname(), "phoneNum",
+				user.getPhoneNum(), "profileImageUrl", user.getProfileImageUrl()));
+	}
+
 }
