@@ -1,18 +1,18 @@
 package com.ddwu.notalonemarket.controller;
 
 import com.ddwu.notalonemarket.domain.Post;
+import com.ddwu.notalonemarket.domain.User;
 import com.ddwu.notalonemarket.dto.PostDTO;
+import com.ddwu.notalonemarket.repository.UserRepository;
 import com.ddwu.notalonemarket.service.PostService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.List;
-import java.util.UUID;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+import com.ddwu.notalonemarket.util.JwtUtil;
+
+import jakarta.servlet.http.HttpServletRequest;
 
 @CrossOrigin(origins = "http://localhost:5173")
 @RestController
@@ -21,61 +21,38 @@ public class PostController {
 
     @Autowired
     private PostService postService;
+    
+    @Autowired
+    private JwtUtil jwtUtil;
+
+    @Autowired
+    private UserRepository userRepository;
+
 
     // 게시글 작성 (이미지 포함)
     @PostMapping("/write")
-    public ResponseEntity<?> createPost(
-            @RequestParam("title") String title,
-            @RequestParam("description") String description,
-            @RequestParam(value = "totalAmount", required = false) Integer totalAmount,
-            @RequestParam(value = "totalQuantity", required = false) Integer totalQuantity,
-            @RequestParam(value = "myQuantity", required = false) Integer myQuantity,
-            @RequestParam(value = "pricePerItem", required = false) Integer pricePerItem,
-            @RequestParam(value = "participantLimit", required = false) Integer participantLimit,
-            @RequestParam(value = "productUrl", required = false) String productUrl,
-            @RequestParam(value = "categoryId", required = false) Long categoryId,
-            @RequestParam(value = "writerId", required = false) Long writerId,
-            @RequestParam(value = "image", required = false) MultipartFile imageFile
-    ) {
-        try {
-            String imageUrl = null;
-
-            if (imageFile != null && !imageFile.isEmpty()) {
-                String fileName = UUID.randomUUID() + "_" + imageFile.getOriginalFilename();
-                String uploadDir = System.getProperty("user.home") + "/notalonemarket/uploads/";
-
-                File dest = new File(uploadDir + fileName);
-                dest.getParentFile().mkdirs(); // 디렉토리 없으면 생성
-                imageFile.transferTo(dest);
-
-                imageUrl = "/uploads/" + fileName;  // 브라우저 접근용 상대경로
-            }
-
-            Post post = new Post();
-            post.setTitle(title);
-            post.setDescription(description);
-            post.setTotalAmount(totalAmount);
-            post.setTotalQuantity(totalQuantity);
-            post.setMyQuantity(myQuantity);
-            post.setPricePerItem(pricePerItem);
-            post.setParticipantLimit(participantLimit);
-            post.setProductUrl(productUrl);
-            post.setImageUrl(imageUrl);
-            post.setCategoryId(categoryId);
-            post.setWriterId(writerId);
-            post.setStatus("진행중");
-
-            Long savedId = postService.createPost(post);
-            return ResponseEntity.ok(savedId);
-
-        } catch (IOException e) {
-            e.printStackTrace();  // 콘솔 로그 출력
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("파일 업로드 실패: " + e.getMessage());
+    public Long createPost(@RequestBody Post post, HttpServletRequest request) {
+        // 1. JWT 토큰에서 loginId 추출
+        String authHeader = request.getHeader("Authorization");
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            throw new RuntimeException("Authorization header is missing or invalid");
         }
+        
+        String token = authHeader.substring(7); // "Bearer " 제거
+        String loginId = jwtUtil.extractLoginId(token);
+
+        // 2. loginId로 사용자 조회
+        User user = userRepository.findByLoginId(loginId)
+                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+
+        // 3. writerId 설정
+        post.setWriterId(user.getUserId());
+
+        // 4. 저장
+        return postService.createPost(post);
     }
 
-    // 전체 게시글 조회
+
     @GetMapping("")
     public List<PostDTO> getAllPosts() {
         return postService.getAllPosts();

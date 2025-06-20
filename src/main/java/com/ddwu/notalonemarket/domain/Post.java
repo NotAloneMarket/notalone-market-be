@@ -31,7 +31,9 @@ public class Post {
     private Integer participantLimit;
     private String productUrl;
     private String imageUrl;
-    private String status;
+
+    @Column(name = "status")
+    private String status = "SELLING";
 
     @Column(name = "category_id")
     private Long categoryId;

@@ -12,7 +12,7 @@ public class PostDTO {
     private String productUrl;
     private String imageUrl;
     private String status;
-    private String categoryName; // ← 추가됨
+    private String categoryName;
     private Long writerId;
 
     // 생성자 (Post 엔티티 → DTO 변환 시 사용)
