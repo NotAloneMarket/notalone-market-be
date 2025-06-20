@@ -28,12 +28,32 @@ public class SecurityConfig {
         http
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/user/login", "/user/register").permitAll()
-                .requestMatchers("/chatrooms/**").authenticated()
+                .requestMatchers(
+                    "/user/login", 
+                    "/user/register"
+                ).permitAll()
+
+                .requestMatchers(
+                    "/posts", 
+                    "/posts/**", 
+                    "/chatrooms", 
+                    "/chatrooms/**", 
+                    "/app/chat/send"  // WebSocket 메시지도 인증 제외 (필요 시)
+                ).permitAll()  // 비로그인 허용이 필요한 API들
+
+                .requestMatchers(
+                    "/user/profile", 
+                    "/user/password", 
+                    "/posts/my", 
+                    "/chatrooms/*/messages", 
+                    "/buyHistory"
+                ).authenticated()  // 로그인 필요
+
                 .anyRequest().authenticated()
             )
-            .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class); // JWT 필터 등록
+            .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
+
 }
