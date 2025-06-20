@@ -29,6 +29,7 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/user/login", "/user/register").permitAll()
+                .requestMatchers("/posts/**").permitAll() // 현서-postman 게시글 API 허용
                 .requestMatchers("/chatrooms/**").authenticated()
                 .anyRequest().authenticated()
             )
