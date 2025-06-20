@@ -12,7 +12,7 @@ import java.util.Optional;
 
 @Service
 public class UserService {
-
+	
     @Autowired
     private UserRepository userRepository;
 
@@ -67,6 +67,11 @@ public class UserService {
         return userRepository.findByLoginId(loginId)
                              .map(User::getUserId)
                              .orElse(null);
+    }
+    public String getUsernameById(Long userId) {
+        return userRepository.findById(userId)
+                             .map(User::getNickname)
+                             .orElse("알 수 없음");
     }
 
 }

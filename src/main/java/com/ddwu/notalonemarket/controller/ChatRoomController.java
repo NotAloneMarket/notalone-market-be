@@ -2,7 +2,9 @@ package com.ddwu.notalonemarket.controller;
 
 import com.ddwu.notalonemarket.dto.ChatRoomCreateDTO;
 import com.ddwu.notalonemarket.dto.ChatRoomDTO;
+import com.ddwu.notalonemarket.dto.MessageResponseDTO;
 import com.ddwu.notalonemarket.service.ChatRoomService;
+import com.ddwu.notalonemarket.service.ChatMessageService;
 import com.ddwu.notalonemarket.service.ChatParticipantService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -15,6 +17,9 @@ public class ChatRoomController {
 
     @Autowired
     private ChatRoomService chatRoomService;
+
+    @Autowired
+    private ChatMessageService chatMessageService;
 
     @Autowired
     private ChatParticipantService participantService;
@@ -42,4 +47,11 @@ public class ChatRoomController {
         }
         return "joined";
     }
+    
+    //특정 채팅방의 메시지 반환
+    @GetMapping("/{roomId}/messages")
+    public List<MessageResponseDTO> getMessages(@PathVariable Long roomId) {
+        return chatMessageService.getMessageDTOsByRoomId(roomId);  // ✅ 인스턴스 호출
+    }
+
 }
