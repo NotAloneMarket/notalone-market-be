@@ -5,6 +5,7 @@ import com.ddwu.notalonemarket.service.BuyHistoryService;
 import com.ddwu.notalonemarket.service.UserService;
 import com.ddwu.notalonemarket.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -12,6 +13,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+@CrossOrigin(origins = "http://localhost:5173")
 @RestController
 @RequestMapping("/buyHistory")
 public class BuyHistoryController {
@@ -24,6 +26,16 @@ public class BuyHistoryController {
 
     @Autowired
     private UserService userService;
+    
+    @PostMapping("/create")
+    public ResponseEntity<String> createBuyHistory(@RequestParam Long userId) {
+        try {
+            buyHistoryService.createBuyHistoryForUser(userId);
+            return ResponseEntity.ok("Buy history created.");
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
 
     @GetMapping
     public ResponseEntity<?> getBuyHistory(@RequestHeader("Authorization") String authHeader) {

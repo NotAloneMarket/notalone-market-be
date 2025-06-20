@@ -2,6 +2,7 @@ package com.ddwu.notalonemarket.service;
 
 import com.ddwu.notalonemarket.domain.ChatMessage;
 import com.ddwu.notalonemarket.dto.ChatMessageDTO;
+import com.ddwu.notalonemarket.dto.MessageResponseDTO;
 import com.ddwu.notalonemarket.repository.ChatMessageRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -9,12 +10,16 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class ChatMessageService {
 
     @Autowired
     private ChatMessageRepository chatMessageRepository;
+    
+    @Autowired
+    private UserService userService; 
 
     @Autowired
     private SimpMessagingTemplate messagingTemplate;
@@ -37,4 +42,17 @@ public class ChatMessageService {
     public List<ChatMessage> getMessages(Long chatId) {
         return chatMessageRepository.findByChatIdOrderByCreatedAtAsc(chatId);
     }
+    
+
+public List<MessageResponseDTO> getMessageDTOsByRoomId(Long chatId) {
+    List<ChatMessage> messages = chatMessageRepository.findByChatIdOrderByCreatedAtAsc(chatId);
+    
+    return messages.stream()
+        .map(msg -> new MessageResponseDTO(
+            userService.getUsernameById(msg.getSenderId()), // sender 이름 조회
+            msg.getContent(),
+            msg.getCreatedAt()
+        ))
+        .collect(Collectors.toList());
+}
 }
