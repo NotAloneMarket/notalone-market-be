@@ -22,8 +22,12 @@ public class Post {
 
     private Integer totalAmount;
     private Integer totalQuantity;
+    @Column(name = "MY_QUANTITY")
     private Integer myQuantity;
+
+    @Column(name = "PRICE_PER_ITEM")
     private Integer pricePerItem;
+
     private Integer participantLimit;
     private String productUrl;
     private String imageUrl;
