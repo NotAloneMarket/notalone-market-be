@@ -8,13 +8,18 @@ import com.ddwu.notalonemarket.service.ChatRoomService;
 import com.ddwu.notalonemarket.service.PostService;
 import com.ddwu.notalonemarket.service.UserService;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.List;
+import java.util.UUID;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
 import com.ddwu.notalonemarket.util.JwtUtil;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -42,26 +47,59 @@ public class PostController {
 
     // 게시글 작성 (이미지 포함)
     @PostMapping("/write")
-    public Long createPost(@RequestBody Post post, HttpServletRequest request) {
-        // 1. JWT 토큰에서 loginId 추출
+    public Long createPost(
+            @RequestParam("title") String title,
+            @RequestParam("description") String description,
+            @RequestParam("totalAmount") Integer totalAmount,
+            @RequestParam("totalQuantity") Integer totalQuantity,
+            @RequestParam("myQuantity") Integer myQuantity,
+            @RequestParam("pricePerItem") Integer pricePerItem,
+            @RequestParam("participantLimit") Integer participantLimit,
+            @RequestParam("productUrl") String productUrl,
+            @RequestParam("categoryId") Long categoryId,
+            @RequestParam(value = "image", required = false) MultipartFile image,
+            HttpServletRequest request
+    ) throws IOException {
+
+        // JWT → loginId 추출
         String authHeader = request.getHeader("Authorization");
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             throw new RuntimeException("Authorization header is missing or invalid");
         }
-        
-        String token = authHeader.substring(7); // "Bearer " 제거
+        String token = authHeader.substring(7);
         String loginId = jwtUtil.extractLoginId(token);
 
-        // 2. loginId로 사용자 조회
         User user = userRepository.findByLoginId(loginId)
                 .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
 
-        // 3. writerId 설정
+        // 이미지 저장 처리
+        String imageUrl = null;
+        if (image != null && !image.isEmpty()) {
+            String fileName = UUID.randomUUID() + "_" + image.getOriginalFilename();
+            String uploadDir = System.getProperty("user.home") + "/notalonemarket/uploads/";
+            File dest = new File(uploadDir + fileName);
+            dest.getParentFile().mkdirs();
+            image.transferTo(dest);
+            imageUrl = "/uploads/" + fileName;
+        }
+
+        // Post 객체 생성
+        Post post = new Post();
+        post.setTitle(title);
+        post.setDescription(description);
+        post.setTotalAmount(totalAmount);
+        post.setTotalQuantity(totalQuantity);
+        post.setMyQuantity(myQuantity);
+        post.setPricePerItem(pricePerItem);
+        post.setParticipantLimit(participantLimit);
+        post.setProductUrl(productUrl);
+        post.setCategoryId(categoryId);
+        post.setImageUrl(imageUrl);
         post.setWriterId(user.getUserId());
 
-        // 4. 저장
         return postService.createPost(post);
     }
+
 
 
     @GetMapping("")
