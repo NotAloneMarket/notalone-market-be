@@ -33,21 +33,29 @@ public class SecurityConfig {
                     "/user/register"
                 ).permitAll()
 
+                // WebSocket 엔드포인트 및 SockJS 관련 경로 허용
+                .requestMatchers(
+                    "/ws/**",         // 반드시 허용해야 함 (핸드셰이크 경로)
+                    "/app/**",        // 메시지 송신 경로
+                    "/topic/**"       // 메시지 구독 경로
+                ).permitAll()
+
+                // 비로그인 허용 REST API
                 .requestMatchers(
                     "/posts", 
                     "/posts/**", 
                     "/chatrooms", 
-                    "/chatrooms/**", 
-                    "/app/chat/send"  // WebSocket 메시지도 인증 제외 (필요 시)
-                ).permitAll()  // 비로그인 허용이 필요한 API들
+                    "/chatrooms/**"
+                ).permitAll()
 
+                // 로그인 필요
                 .requestMatchers(
                     "/user/profile", 
                     "/user/password", 
                     "/posts/my", 
                     "/chatrooms/*/messages", 
                     "/buyHistory"
-                ).authenticated()  // 로그인 필요
+                ).authenticated()
 
                 .anyRequest().authenticated()
             )
@@ -55,5 +63,4 @@ public class SecurityConfig {
 
         return http.build();
     }
-
 }

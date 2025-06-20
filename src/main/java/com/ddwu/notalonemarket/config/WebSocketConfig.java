@@ -12,7 +12,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         registry.addEndpoint("/ws")  // 프론트와 맞춰서 '/ws'로 설정
-                .setAllowedOrigins("http://localhost:5173") // CORS 허용 출처 설정
+        		.setAllowedOriginPatterns("*")
                 .withSockJS(); // SockJS 사용
     }
 
