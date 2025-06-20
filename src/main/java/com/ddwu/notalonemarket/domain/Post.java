@@ -6,6 +6,7 @@ import jakarta.persistence.*;
 
 @Entity
 @Table(name = "Post")
+
 public class Post {
 
 	@Id
@@ -38,8 +39,22 @@ public class Post {
     @Column(name = "category_id")
     private Long categoryId;
 
+    
+    
     @Column(name = "writer_id")
     private Long writerId;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "writer_id", insertable = false, updatable = false)
+    private User user;
+
+    public User getUser() {
+        return user;
+    }
+    
+    
+    
+
 
     public Post() {}
 

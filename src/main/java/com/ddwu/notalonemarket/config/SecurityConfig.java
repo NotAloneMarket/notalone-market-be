@@ -29,7 +29,7 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(
-                	"/uploads/**", // ✅ 이미지 URL 허용 추가
+                	"/uploads/**", // 이미지 URL 허용 추가
                     "/user/login", 
                     "/user/register"
                 ).permitAll()
