@@ -54,37 +54,48 @@ public class UserController {
 
 	// 프로필 정보 수정 (닉네임/폰번호 + 프로필 이미지)
 	@PutMapping("/profile")
-	public ResponseEntity<?> updateProfile(@RequestParam Long userId, @RequestParam(required = false) String nickname,
-			@RequestParam(required = false) String phoneNum, @RequestParam(required = false) MultipartFile profileImage
-
+	public ResponseEntity<?> updateProfile(
+	        @RequestHeader("Authorization") String authHeader,
+	        @RequestParam(required = false) String nickname,
+	        @RequestParam(required = false) String phoneNum,
+	        @RequestParam(required = false) MultipartFile profileImage
 	) {
-		try {
-			String imageUrl = null;
+	    try {
+	        if (!authHeader.startsWith("Bearer ")) {
+	            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token");
+	        }
 
-			if (profileImage != null && !profileImage.isEmpty()) {
-				String fileName = UUID.randomUUID() + "_" + profileImage.getOriginalFilename();
-				String uploadDir = System.getProperty("user.home") + "/notalonemarket/uploads/";
-				File dest = new File(uploadDir + fileName);
-				dest.getParentFile().mkdirs();
-				profileImage.transferTo(dest);
-				imageUrl = "/uploads/" + fileName;
-			}
+	        String token = authHeader.substring(7);
+	        String loginId = jwtUtil.extractLoginId(token);
+	        User user = userService.findByLoginId(loginId);
 
-			userService.updateProfile(userId, nickname, phoneNum, imageUrl);
-			return ResponseEntity.ok(Map.of("message", "Profile updated successfully"));
+	        if (user == null) {
+	            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
+	        }
 
-		} catch (IOException e) {
-			e.printStackTrace();
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-					.body(Map.of("error", "프로필 수정 실패", "message", e.getMessage()));
-		}
+	        String imageUrl = null;
+	        if (profileImage != null && !profileImage.isEmpty()) {
+	            String fileName = UUID.randomUUID() + "_" + profileImage.getOriginalFilename();
+	            String uploadDir = System.getProperty("user.home") + "/notalonemarket/uploads/";
+	            File dest = new File(uploadDir + fileName);
+	            dest.getParentFile().mkdirs();
+	            profileImage.transferTo(dest);
+	            imageUrl = "/uploads/" + fileName;
+	        }
+
+	        userService.updateProfile(user.getUserId(), nickname, phoneNum, imageUrl);
+
+	        return ResponseEntity.ok(Map.of("message", "Profile updated successfully"));
+
+	    } catch (IOException e) {
+	        e.printStackTrace();
+	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+	                .body(Map.of("error", "프로필 수정 실패", "message", e.getMessage()));
+	    }
 	}
 
-	@PutMapping("/password")
-	public ResponseEntity<?> changePassword(@RequestParam Long userId, @RequestBody Map<String, String> body) {
-		userService.changePassword(userId, body.get("currentPw"), body.get("newPw"));
-		return ResponseEntity.ok(Map.of("message", "Password changed successfully"));
-	}
+
+
 
 	@GetMapping("/me")
 	public ResponseEntity<?> getMyInfo(@RequestHeader("Authorization") String authHeader) {
@@ -100,7 +111,7 @@ public class UserController {
 			return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
 		}
 
-		return ResponseEntity.ok(Map.of("userId", user.getUserId(), "nickname", user.getNickname(), "phoneNum",
+		return ResponseEntity.ok(Map.of("userId", user.getUserId(), "loginId", user.getLoginId(), "nickname", user.getNickname(), "phoneNum",
 				user.getPhoneNum(), "profileImageUrl", user.getProfileImageUrl()));
 	}
 
