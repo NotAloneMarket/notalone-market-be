@@ -89,5 +89,9 @@ public class PostService {
                 })
                 .collect(Collectors.toList());
     }
+    
+    public PostDTO getPostDTOById(Long postId) {
+        return getPostDetail(postId); // 이미 구현된 상세 조회 메서드 활용
+    }
 
 }
