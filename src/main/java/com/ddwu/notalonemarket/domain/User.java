@@ -7,12 +7,12 @@ import java.time.LocalDateTime;
 @Table(name = "users")
 public class User {
 
-	@Id
+    @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "user_seq_gen")
     @SequenceGenerator(name = "user_seq_gen", sequenceName = "SEQ_USER", allocationSize = 1)
     @Column(name = "user_id")
     private Long userId;
-	
+
     @Column(nullable = false, unique = true, length = 20)
     private String loginId;
 
@@ -33,6 +33,10 @@ public class User {
     private LocalDateTime deletedAt;
 
     private LocalDateTime createAt = LocalDateTime.now();
+
+    // 프로필 이미지 경로 필드 추가
+    @Column(length = 500)
+    private String profileImageUrl;
 
     // Getters & Setters
     public Long getUserId() {
@@ -105,5 +109,13 @@ public class User {
 
     public void setCreateAt(LocalDateTime createAt) {
         this.createAt = createAt;
+    }
+
+    public String getProfileImageUrl() {
+        return profileImageUrl;
+    }
+
+    public void setProfileImageUrl(String profileImageUrl) {
+        this.profileImageUrl = profileImageUrl;
     }
 }
