@@ -1,6 +1,5 @@
 package com.ddwu.notalonemarket.controller;
 
-import com.ddwu.notalonemarket.domain.User;
 import com.ddwu.notalonemarket.dto.BuyHistoryResponseDTO;
 import com.ddwu.notalonemarket.service.BuyHistoryService;
 import com.ddwu.notalonemarket.service.UserService;

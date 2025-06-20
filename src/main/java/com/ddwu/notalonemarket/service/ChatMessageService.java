@@ -44,15 +44,16 @@ public class ChatMessageService {
     }
     
 
-public List<MessageResponseDTO> getMessageDTOsByRoomId(Long chatId) {
-    List<ChatMessage> messages = chatMessageRepository.findByChatIdOrderByCreatedAtAsc(chatId);
-    
-    return messages.stream()
-        .map(msg -> new MessageResponseDTO(
-            userService.getUsernameById(msg.getSenderId()), // sender 이름 조회
-            msg.getContent(),
-            msg.getCreatedAt()
-        ))
-        .collect(Collectors.toList());
-}
+    public List<MessageResponseDTO> getMessageDTOsByRoomId(Long chatId) {
+        List<ChatMessage> messages = chatMessageRepository.findByChatIdOrderByCreatedAtAsc(chatId);
+        
+        return messages.stream()
+            .map(msg -> new MessageResponseDTO(
+                msg.getSenderId(),  // 닉네임 대신 userId 직접 전달
+                msg.getContent(),
+                msg.getCreatedAt()
+            ))
+            .collect(Collectors.toList());
+    }
+
 }

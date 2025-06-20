@@ -55,5 +55,12 @@ public class ChatParticipantService {
             ))
             .collect(Collectors.toList());
     }
+    
+    public int countParticipantsByPostId(Long postId) {
+        ChatRoom room = chatRoomRepository.findByPostId(postId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 postId의 채팅방이 존재하지 않습니다: " + postId));
+        return chatParticipantRepository.findByChatId(room.getId()).size();
+    }
+
 
 }
