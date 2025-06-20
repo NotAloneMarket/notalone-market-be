@@ -17,6 +17,7 @@ import java.net.URI;
 import java.util.Map;
 import java.util.UUID;
 
+@CrossOrigin(origins = "http://localhost:5173")
 @RestController
 @RequestMapping("/user")
 public class UserController {
