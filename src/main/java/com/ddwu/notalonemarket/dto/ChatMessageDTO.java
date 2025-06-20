@@ -3,50 +3,32 @@ package com.ddwu.notalonemarket.dto;
 import java.time.LocalDateTime;
 
 public class ChatMessageDTO {
-    private Integer roomId;
-    private Integer senderId;
-    private String content;
-    private String messageType;
-    private LocalDateTime createdAt;
+    private String roomId;
+    private String sender;
+    private String message;
+    private LocalDateTime timestamp;
 
-    // Getter & Setter
-    public Integer getRoomId() {
-        return roomId;
-    }
+    // 기본 생성자
+    public ChatMessageDTO() {}
 
-    public void setRoomId(Integer roomId) {
+    // 생성자
+    public ChatMessageDTO(String roomId, String sender, String message, LocalDateTime timestamp) {
         this.roomId = roomId;
+        this.sender = sender;
+        this.message = message;
+        this.timestamp = timestamp;
     }
 
-    public Integer getSenderId() {
-        return senderId;
-    }
+    // Getters / Setters
+    public String getRoomId() { return roomId; }
+    public void setRoomId(String roomId) { this.roomId = roomId; }
 
-    public void setSenderId(Integer senderId) {
-        this.senderId = senderId;
-    }
+    public String getSender() { return sender; }
+    public void setSender(String sender) { this.sender = sender; }
 
-    public String getContent() {
-        return content;
-    }
+    public String getMessage() { return message; }
+    public void setMessage(String message) { this.message = message; }
 
-    public void setContent(String content) {
-        this.content = content;
-    }
-
-    public String getMessageType() {
-        return messageType;
-    }
-
-    public void setMessageType(String messageType) {
-        this.messageType = messageType;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
+    public LocalDateTime getTimestamp() { return timestamp; }
+    public void setTimestamp(LocalDateTime timestamp) { this.timestamp = timestamp; }
 }
