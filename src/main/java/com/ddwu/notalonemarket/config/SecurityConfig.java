@@ -28,9 +28,11 @@ public class SecurityConfig {
         http
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/user/login", "/user/register").permitAll()
-                .requestMatchers("/posts/**").permitAll() // 현서-postman 게시글 API 허용
+                .requestMatchers("/user/login", "/user/register", "/user/profile").permitAll()
+                .requestMatchers("/posts/**").permitAll()
                 .requestMatchers("/chatrooms/**").authenticated()
+                .requestMatchers("/uploads/**").permitAll()
+
                 .anyRequest().authenticated()
             )
             .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class); // JWT 필터 등록
