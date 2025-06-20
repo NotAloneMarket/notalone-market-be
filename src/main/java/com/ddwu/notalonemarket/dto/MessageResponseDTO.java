@@ -3,22 +3,22 @@ package com.ddwu.notalonemarket.dto;
 import java.time.LocalDateTime;
 
 public class MessageResponseDTO {
-    private String sender;
+    private Long senderId; 
     private String message;
     private LocalDateTime timestamp;
 
-    public MessageResponseDTO(String sender, String message, LocalDateTime timestamp) {
-        this.sender = sender;
+    public MessageResponseDTO(Long senderId, String message, LocalDateTime timestamp) {
+        this.senderId = senderId;
         this.message = message;
         this.timestamp = timestamp;
     }
 
-    public String getSender() {
-        return sender;
+    public Long getSenderId() {
+        return senderId;
     }
 
-    public void setSender(String sender) {
-        this.sender = sender;
+    public void setSenderId(Long senderId) {
+        this.senderId = senderId;
     }
 
     public String getMessage() {

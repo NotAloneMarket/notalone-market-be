@@ -103,5 +103,15 @@ public class ChatRoomController {
         return "completed";
     }
 
-    
+    // 채팅방 참여자 수 반환 API
+    @GetMapping("/count/{postId}")
+    public ResponseEntity<?> countParticipants(@PathVariable Long postId) {
+        try {
+            int count = participantService.countParticipantsByPostId(postId);
+            return ResponseEntity.ok(Map.of("participantCount", count));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", e.getMessage()));
+        }
+    }
+
 }
