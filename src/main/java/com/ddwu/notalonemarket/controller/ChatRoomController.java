@@ -1,42 +1,45 @@
 package com.ddwu.notalonemarket.controller;
 
+import com.ddwu.notalonemarket.dto.ChatRoomCreateDTO;
 import com.ddwu.notalonemarket.dto.ChatRoomDTO;
 import com.ddwu.notalonemarket.service.ChatRoomService;
+import com.ddwu.notalonemarket.service.ChatParticipantService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/chat")  // React용 API prefix 추가
+@RequestMapping("/chatrooms")
 public class ChatRoomController {
 
-    private final ChatRoomService chatRoomService;
+    @Autowired
+    private ChatRoomService chatRoomService;
 
     @Autowired
-    public ChatRoomController(ChatRoomService chatRoomService) {
-        this.chatRoomService = chatRoomService;
+    private ChatParticipantService participantService;
+
+    // 채팅방 생성
+    @PostMapping("")
+    public Long createRoom(@RequestBody ChatRoomCreateDTO dto) {
+        Long roomId = chatRoomService.createRoom(dto);
+        // 방장 자동 입장 처리
+        participantService.join(roomId, dto.getUserId(), true);
+        return roomId;
     }
 
-    // 채팅방 목록 조회 (GET /api/chat/rooms?userId=xxx)
-    @GetMapping("/rooms")
-    public ResponseEntity<List<ChatRoomDTO>> rooms(@RequestParam String userId) {
-        List<ChatRoomDTO> rooms = chatRoomService.getChatRoomsByUser(userId);
-        return ResponseEntity.ok(rooms);
+    // 유저가 참여한 채팅방 목록 조회
+    @GetMapping("")
+    public List<ChatRoomDTO> getRooms(@RequestParam Long userId) {
+        return chatRoomService.getRoomsByUserId(userId);
     }
 
-    // 채팅방 정보 조회 (GET /api/chat/room?roomId=xxx&userId=yyy)
-    @GetMapping("/room")
-    public ResponseEntity<ChatRoomDTO> room(@RequestParam Integer roomId, @RequestParam String userId) {
-        ChatRoomDTO chatRoom = chatRoomService.enterChatRoom(roomId, userId);
-        return ResponseEntity.ok(chatRoom);
-    }
-
-    // 거래 완료 처리 (POST /api/chat/room/complete)
-    @PostMapping("/room/complete")
-    public ResponseEntity<String> complete(@RequestParam Integer roomId, @RequestParam String userId) {
-        chatRoomService.completeTransaction(roomId, userId);
-        return ResponseEntity.ok("success");
+    // 채팅방에 입장
+    @PostMapping("/{roomId}/join")
+    public String joinRoom(@PathVariable Long roomId, @RequestParam Long userId) {
+        if (!participantService.isUserInRoom(userId, roomId)) {
+            participantService.join(roomId, userId, false);
+        }
+        return "joined";
     }
 }
