@@ -19,7 +19,6 @@ public class ChatRoomService {
 
     public Long createRoom(ChatRoomCreateDTO dto) {
         ChatRoom chatRoom = new ChatRoom(
-                dto.getUserId(),
                 dto.getPostId(),
                 dto.getHostId(),
                 "N", // isCompleted 기본값
@@ -28,19 +27,6 @@ public class ChatRoomService {
         );
         ChatRoom saved = chatRoomRepository.save(chatRoom);
         return saved.getId();
-    }
-
-    public List<ChatRoomDTO> getRoomsByUserId(Long userId) {
-        return chatRoomRepository.findByUserId(userId).stream()
-                .map(room -> new ChatRoomDTO(
-                        room.getId(),
-                        room.getPostId(),
-                        room.getHostId(),
-                        room.getIsCompleted(),
-                        room.getCreatedAt(),
-                        room.getCompletedAt()
-                ))
-                .collect(Collectors.toList());
     }
 
     public ChatRoom getRoom(Long id) {

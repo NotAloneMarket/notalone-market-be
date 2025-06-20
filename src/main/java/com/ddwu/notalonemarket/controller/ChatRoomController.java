@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@CrossOrigin(origins = "http://localhost:5173")
 @RestController
 @RequestMapping("/chatrooms")
 public class ChatRoomController {
@@ -29,14 +30,14 @@ public class ChatRoomController {
     public Long createRoom(@RequestBody ChatRoomCreateDTO dto) {
         Long roomId = chatRoomService.createRoom(dto);
         // 방장 자동 입장 처리
-        participantService.join(roomId, dto.getUserId(), true);
+        participantService.join(roomId, dto.getHostId(), true);
         return roomId;
     }
 
     // 유저가 참여한 채팅방 목록 조회
     @GetMapping("")
     public List<ChatRoomDTO> getRooms(@RequestParam Long userId) {
-        return chatRoomService.getRoomsByUserId(userId);
+        return participantService.getRoomsByUserId(userId);
     }
 
     // 채팅방에 입장
