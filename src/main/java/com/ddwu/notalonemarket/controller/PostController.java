@@ -1,10 +1,15 @@
 package com.ddwu.notalonemarket.controller;
 
 import com.ddwu.notalonemarket.domain.Post;
+import com.ddwu.notalonemarket.domain.User;
 import com.ddwu.notalonemarket.dto.PostDTO;
+import com.ddwu.notalonemarket.repository.UserRepository;
 import com.ddwu.notalonemarket.service.PostService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import com.ddwu.notalonemarket.util.JwtUtil;
+
+import jakarta.servlet.http.HttpServletRequest;
 
 import java.util.List;
 
@@ -15,11 +20,36 @@ public class PostController {
 
     @Autowired
     private PostService postService;
+    
+    @Autowired
+    private JwtUtil jwtUtil;
+
+    @Autowired
+    private UserRepository userRepository;
+
 
     @PostMapping("/write")
-    public Long createPost(@RequestBody Post post) {
+    public Long createPost(@RequestBody Post post, HttpServletRequest request) {
+        // 1. JWT 토큰에서 loginId 추출
+        String authHeader = request.getHeader("Authorization");
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            throw new RuntimeException("Authorization header is missing or invalid");
+        }
+        
+        String token = authHeader.substring(7); // "Bearer " 제거
+        String loginId = jwtUtil.extractLoginId(token);
+
+        // 2. loginId로 사용자 조회
+        User user = userRepository.findByLoginId(loginId)
+                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+
+        // 3. writerId 설정
+        post.setWriterId(user.getUserId());
+
+        // 4. 저장
         return postService.createPost(post);
     }
+
 
     @GetMapping("")
     public List<PostDTO> getAllPosts() {

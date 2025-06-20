@@ -29,13 +29,14 @@ public class PostService {
     }
 
     public List<PostDTO> getAllPosts() {
-        return postRepository.findAll().stream()
+        return postRepository.findByStatus("SELLING").stream()
                 .map(post -> {
                     String categoryName = getCategoryName(post.getCategoryId());
                     return post.toDTO(categoryName);
                 })
                 .collect(Collectors.toList());
     }
+
 
     public PostDTO getPostDetail(Long id) {
         Optional<Post> postOpt = postRepository.findById(id);
