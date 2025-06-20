@@ -55,4 +55,12 @@ public class ChatRoomController {
         return chatMessageService.getMessageDTOsByRoomId(roomId);  // ✅ 인스턴스 호출
     }
 
+    // 채팅방 거래 완료 처리
+    @PutMapping("/{roomId}/complete")
+    public String completeRoom(@PathVariable Long roomId) {
+        chatRoomService.completeRoom(roomId);
+        return "completed";
+    }
+
+    
 }

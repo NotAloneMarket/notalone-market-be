@@ -2,7 +2,6 @@ package com.ddwu.notalonemarket.service;
 
 import com.ddwu.notalonemarket.domain.ChatRoom;
 import com.ddwu.notalonemarket.dto.ChatRoomCreateDTO;
-import com.ddwu.notalonemarket.dto.ChatRoomDTO;
 import com.ddwu.notalonemarket.repository.ChatRoomRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -33,4 +32,15 @@ public class ChatRoomService {
         return chatRoomRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("채팅방을 찾을 수 없습니다. ID: " + id));
     }
+    
+    public void completeRoom(Long roomId) {
+        ChatRoom room = chatRoomRepository.findById(roomId)
+            .orElseThrow(() -> new IllegalArgumentException("채팅방을 찾을 수 없습니다. ID: " + roomId));
+
+        room.setIsCompleted("Y");
+        room.setCompletedAt(LocalDateTime.now());
+
+        chatRoomRepository.save(room);
+    }
+
 }
