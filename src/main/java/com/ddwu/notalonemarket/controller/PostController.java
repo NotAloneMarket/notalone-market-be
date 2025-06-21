@@ -3,6 +3,7 @@ package com.ddwu.notalonemarket.controller;
 import com.ddwu.notalonemarket.domain.Post;
 import com.ddwu.notalonemarket.domain.User;
 import com.ddwu.notalonemarket.dto.PostDTO;
+import com.ddwu.notalonemarket.mapper.PostMapper;
 import com.ddwu.notalonemarket.repository.UserRepository;
 import com.ddwu.notalonemarket.service.ChatRoomService;
 import com.ddwu.notalonemarket.service.PostService;
@@ -45,6 +46,9 @@ public class PostController {
     @Autowired
     private ChatRoomService chatRoomService;
 
+    //mybatis 적용하려했는데 오류남
+    //@Autowired
+    //private PostMapper postMapper;
 
  // 게시글 작성 (이미지 포함)
     @PostMapping("/write")

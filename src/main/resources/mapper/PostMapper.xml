@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!-- mybatis -->
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ddwu.notalonemarket.mapper.PostMapper">
+    <insert id="insertPost" parameterType="com.ddwu.notalonemarket.domain.Post" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO Post (
+            title, description, total_amount, total_quantity, my_quantity,
+            price_per_item, participant_limit, product_url, image_url,
+            status, category_id, writer_id
+        ) VALUES (
+            #{title}, #{description}, #{totalAmount}, #{totalQuantity}, #{myQuantity},
+            #{pricePerItem}, #{participantLimit}, #{productUrl}, #{imageUrl},
+            #{status}, #{categoryId}, #{writerId}
+        )
+    </insert>
+
+    <select id="selectPostById" resultType="com.ddwu.notalonemarket.domain.Post">
+        SELECT * FROM Post WHERE id = #{id}
+    </select>
+
+    <select id="selectAllSellingPosts" resultType="com.ddwu.notalonemarket.domain.Post">
+        SELECT * FROM Post WHERE status = 'SELLING'
+    </select>
+</mapper>
