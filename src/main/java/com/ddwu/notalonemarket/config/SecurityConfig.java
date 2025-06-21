@@ -60,6 +60,7 @@ public class SecurityConfig {
                 ).permitAll()
                 
                 .requestMatchers("/onboarding", "/assets/**").permitAll()
+                .requestMatchers("/uploads/**").permitAll()
 
 
                 .anyRequest().authenticated()
