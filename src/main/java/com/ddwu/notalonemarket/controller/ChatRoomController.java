@@ -38,14 +38,6 @@ public class ChatRoomController {
 	@Autowired
 	private UserService userService;
 
-	// 채팅방 생성
-//    @PostMapping("")
-//    public Long createRoom(@RequestBody ChatRoomCreateDTO dto) {
-//        Long roomId = chatRoomService.createRoom(dto);
-//        // 방장 자동 입장 처리
-//        participantService.join(roomId, dto.getHostId(), true);
-//        return roomId;
-//    }
 	@PostMapping("")
 	public ResponseEntity<?> createRoom(@RequestBody ChatRoomCreateDTO dto,
 	                                    @RequestHeader("Authorization") String authHeader) {
@@ -138,14 +130,29 @@ public class ChatRoomController {
 	}
 
 	// 채팅방 참여자 수 반환 API
+	@GetMapping("/post/{postId}/room")
+	public ResponseEntity<?> getChatRoomIdByPostId(@PathVariable Long postId) {
+	    try {
+	        Long chatRoomId = chatRoomService.findRoomIdByPostId(postId);
+	        return ResponseEntity.ok(Map.of("chatRoomId", chatRoomId));
+	    } catch (Exception e) {
+	        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", "채팅방을 찾을 수 없습니다."));
+	    }
+	}
+	
+	// 디테일 페이지 동그라미 
 	@GetMapping("/{roomId}/count")
-	public ResponseEntity<?> countParticipants(@PathVariable Long roomId) {
-		try {
-			long count = participantService.countParticipantsByRoomId(roomId);
-			return ResponseEntity.ok(Map.of("participantCount", count));
-		} catch (Exception e) {
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", e.getMessage()));
-		}
+	public ResponseEntity<?> countParticipants(@PathVariable Long roomId, @RequestHeader("Authorization") String authHeader) {
+	    if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+	        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token");
+	    }
+
+	    try {
+	        long count = participantService.countParticipantsByRoomId(roomId);
+	        return ResponseEntity.ok(Map.of("participantCount", count));
+	    } catch (Exception e) {
+	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", e.getMessage()));
+	    }
 	}
 
 }
