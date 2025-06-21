@@ -105,6 +105,11 @@
 		</dependency>
 
 
+        <!--  Thymeleaf 템플릿 엔진 의존성 -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-thymeleaf</artifactId>
+        </dependency>
 
 
     </dependencies>
