@@ -5,8 +5,11 @@ import com.ddwu.notalonemarket.dto.UserRegisterDTO;
 import com.ddwu.notalonemarket.service.UserService;
 import com.ddwu.notalonemarket.util.JwtUtil;
 
+import jakarta.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -29,16 +32,14 @@ public class UserController {
 	private JwtUtil jwtUtil;
 
 	@PostMapping("/register")
-	public ResponseEntity<?> register(@RequestBody UserRegisterDTO dto) {
-		User user = new User();
-		user.setLoginId(dto.getLoginId());
-		user.setPassword(dto.getPassword());
-		user.setNickname(dto.getNickname());
-		user.setPhoneNum(dto.getPhoneNum());
-		user.setAccountNumber(dto.getAccountNumber());
-
-		User saved = userService.register(user);
-		return ResponseEntity.created(URI.create("/users/" + saved.getUserId())).build();
+	public ResponseEntity<?> register(@Valid @RequestBody UserRegisterDTO dto, BindingResult bindingResult) {
+		if (bindingResult.hasErrors()) {
+	        // 에러 메시지 추출
+	        String errorMsg = bindingResult.getAllErrors().get(0).getDefaultMessage();
+	        return ResponseEntity.badRequest().body(Map.of("error", errorMsg));
+	    }
+		User saved = userService.register(dto);
+	    return ResponseEntity.created(URI.create("/users/" + saved.getUserId())).build();
 	}
 
 	@PostMapping("/login")
