@@ -29,3 +29,4 @@ out/
 # Spring Boot
 application.properties
 application.yml
+/bin/
