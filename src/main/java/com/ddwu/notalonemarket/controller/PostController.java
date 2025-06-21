@@ -122,17 +122,23 @@ public class PostController {
 
     @GetMapping("/my")
     public ResponseEntity<?> getMyPosts(@RequestHeader("Authorization") String authHeader) {
+    	System.out.println("✅ getMyPosts() 진입");
+
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token");
         }
 
         String token = authHeader.substring(7);
         String loginId = jwtUtil.extractLoginId(token);
+        System.out.println("👉 loginId: " + loginId); // 나중에 지우기 
 
+        
         User user = userService.findByLoginId(loginId);
         if (user == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
-        }
+        } 
+        
+        System.out.println("👉 userId: " + user.getUserId()); // 나중에 지우기 
 
         List<PostDTO> myPosts = postService.getMyPosts(user.getUserId());
         return ResponseEntity.ok(myPosts);
