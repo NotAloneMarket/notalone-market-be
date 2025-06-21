@@ -16,18 +16,36 @@ public class JwtUtil {
 
     private final Key secretKey = Keys.hmacShaKeyFor(secret.getBytes()); // Key 객체로 변환
 
+//    public String validateTokenAndGetLoginId(String token) {
+//        try {
+//            return Jwts.parserBuilder()
+//                    .setSigningKey(secretKey)
+//                    .build()
+//                    .parseClaimsJws(token)
+//                    .getBody()
+//                    .getSubject();
+//        } catch (Exception e) {
+//            return null;
+//        }
+//    }
+    
     public String validateTokenAndGetLoginId(String token) {
         try {
-            return Jwts.parserBuilder()
+            String loginId = Jwts.parserBuilder()
                     .setSigningKey(secretKey)
                     .build()
                     .parseClaimsJws(token)
                     .getBody()
                     .getSubject();
+
+            System.out.println("✅ 유효한 JWT. loginId = " + loginId);
+            return loginId;
         } catch (Exception e) {
+            System.out.println("❌ JWT 유효성 검증 실패: " + e.getMessage());
             return null;
         }
     }
+
     
     // 사용자 정보 추출 메서드
     public String extractLoginId(String token) {

@@ -3,11 +3,17 @@ package com.ddwu.notalonemarket.config;
 import com.ddwu.notalonemarket.util.JwtFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.List;
 
 @Configuration
 public class SecurityConfig {
@@ -26,42 +32,45 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
+            .cors(Customizer.withDefaults()) // 최신 방식
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(
-                	"/uploads/**", // 이미지 URL 허용 추가
+                    "/uploads/**",
                     "/user/login", 
                     "/user/register"
                 ).permitAll()
-
-                // WebSocket 엔드포인트 및 SockJS 관련 경로 허용
                 .requestMatchers(
-                    "/ws/**",         // 반드시 허용해야 함 (핸드셰이크 경로)
-                    "/app/**",        // 메시지 송신 경로
-                    "/topic/**"       // 메시지 구독 경로
+                    "/ws/**", "/app/**", "/topic/**"
                 ).permitAll()
-
-                // 비로그인 허용 REST API
                 .requestMatchers(
-                    "/posts", 
-                    "/posts/**", 
-                    "/chatrooms", 
-                    "/chatrooms/**"
+                    "/posts", "/posts/**",
+                    "/chatrooms", "/chatrooms/**"
                 ).permitAll()
-
-                // 로그인 필요
                 .requestMatchers(
-                    "/user/profile", 
-                    "/user/password", 
-                    "/posts/my", 
-                    "/chatrooms/*/messages", 
+                    "/user/profile", "/user/password", 
+                    "/posts/my", "/chatrooms/*/messages", 
                     "/buyHistory"
                 ).authenticated()
-
                 .anyRequest().authenticated()
             )
             .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
+    }
+
+    // CORS 정책 전역 정의
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration config = new CorsConfiguration();
+        config.setAllowCredentials(true);
+        config.setAllowedOrigins(List.of("http://localhost:5173"));
+        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        config.setAllowedHeaders(List.of("*"));
+        config.setExposedHeaders(List.of("Authorization"));
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", config);
+        return source;
     }
 }
