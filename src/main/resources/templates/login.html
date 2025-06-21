@@ -1,80 +1,153 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8">
-    <title>로그인</title>
-    <style>
-        body {
-            background-color: #f8f8f8;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-        }
-        .login-container {
-            width: 360px;
-            background: #fff;
-            border-radius: 12px;
-            padding: 40px 24px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.05);
-        }
-        .login-header {
-            text-align: center;
-            margin-bottom: 32px;
-        }
-        .login-header h1 {
-            color: #5a6ef5;
-            margin-bottom: 8px;
-        }
-        input {
-            width: 100%;
-            padding: 10px;
-            border-radius: 12px;
-            border: 1px solid #eee;
-            margin-bottom: 16px;
-        }
-        .error-message {
-            color: red;
-            font-size: 13px;
-            margin-bottom: 16px;
-            text-align: center;
-        }
-        button {
-            width: 100%;
-            background-color: #5a6ef5;
-            color: #fff;
-            border: none;
-            border-radius: 12px;
-            padding: 12px;
-            font-size: 15px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-        .signup-link {
-            text-align: center;
-            font-size: 13px;
-            color: #5a6ef5;
-            margin-top: 12px;
-            display: block;
-            text-decoration: underline;
-        }
-    </style>
+<meta charset="UTF-8" />
+<title>로그인</title>
+<style>
+body {
+	background-color: #f8f8f8;
+	height: 100vh;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	padding: 20px;
+	margin: 0; /* 기본 body margin 제거 */
+}
+
+.login-container {
+	width: 100%;
+	max-width: 360px;
+	background-color: #ffffff;
+	border-radius: 12px;
+	padding: 40px 24px;
+	box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+}
+
+.header-title {
+	font-size: 24px;
+	font-weight: bold;
+	color: #5a6ef5;
+	margin-bottom: 8px;
+}
+
+.header-subtitle {
+	font-size: 13px;
+	color: #888;
+}
+
+.login-title {
+	font-weight: bold;
+	font-size: 16px;
+	margin-bottom: 24px;
+}
+
+.input-group {
+	display: flex;
+	align-items: center;
+	background-color: #fafafa;
+	border: 1px solid #eee;
+	border-radius: 12px;
+	padding: 10px 14px;
+	margin-bottom: 16px;
+}
+
+.input-group input {
+	flex: 1;
+	border: none;
+	outline: none;
+	background: transparent;
+	font-size: 14px;
+}
+
+.input-group .icon {
+	margin-right: 10px;
+	color: #aaa;
+}
+
+.error-message {
+	color: red;
+	font-size: 13px;
+	margin-bottom: 16px;
+	text-align: center;
+}
+
+.login-button {
+	width: 100%;
+	background-color: #5a6ef5;
+	color: #fff;
+	border: none;
+	border-radius: 12px;
+	padding: 12px;
+	font-size: 15px;
+	font-weight: bold;
+	cursor: pointer;
+	margin-bottom: 12px;
+}
+
+.signup-link {
+	font-size: 13px;
+	color: #5a6ef5;
+	cursor: pointer;
+	text-decoration: underline;
+}
+</style>
 </head>
 <body>
-    <div class="login-container">
-        <div class="login-header">
-            <h1>나혼자 안산다</h1>
-            <p>1인 가구를 위한 공동구매 플랫폼</p>
-        </div>
+	<div class="login-container">
+		<div style="text-align: center; margin-bottom: 32px">
 
-        <form th:action="@{/user/login}" method="post">
-            <input type="text" name="loginId" placeholder="아이디" required />
-            <input type="password" name="password" placeholder="비밀번호" required />
-            <div th:if="${error}" class="error-message" th:text="${error}"></div>
-            <button type="submit">로그인</button>
-        </form>
+			<h1 class="header-title">나혼자 안산다</h1>
+			<p class="header-subtitle">1인 가구를 위한 공동구매 플랫폼</p>
+		</div>
 
-        <a th:href="@{/user/join}" class="signup-link">회원가입</a>
-    </div>
+		<div style="text-align: center" class="login-title">로그인</div>
+
+		<form id="loginForm" method="post" action="/user/login">
+			<div class="input-group">
+				<span class="icon">✉️</span> <input type="text" id="loginId"
+					name="loginId" placeholder="아이디" required />
+			</div>
+
+			<div class="input-group">
+				<span class="icon">🔒</span> <input type="password" id="password"
+					name="password" placeholder="비밀번호" required />
+			</div>
+
+			<div th:if="${errorMessage}" class="error-message"
+				th:text="${errorMessage}"></div>
+
+			<button type="submit" class="login-button">로그인</button>
+		</form>
+
+		<script>
+		document.getElementById("loginForm").addEventListener("submit", async function (e) {
+		  e.preventDefault();
+		
+		  const loginId = document.getElementById("loginId").value;
+		  const password = document.getElementById("password").value;
+		
+		  const res = await fetch("/user/login", {
+		    method: "POST",
+		    headers: { "Content-Type": "application/json" },
+		    body: JSON.stringify({ loginId, password })
+		  });
+		
+		  if (res.ok) {
+		    const data = await res.json();
+		    localStorage.setItem("token", data.token);
+		    localStorage.setItem("userId", data.userId);
+		    // 리액트 앱으로 이동
+		    window.location.href = "http://localhost:5173/home";
+		  } else {
+		    alert("로그인 실패! 아이디 또는 비밀번호를 확인하세요.");
+		  }
+		});
+	    </script>
+
+		<div style="text-align: center">
+			<span class="signup-link"
+				onclick="location.href='http://localhost:5173/join'"> 회원가입 </span>
+		</div>
+	</div>
 </body>
 </html>

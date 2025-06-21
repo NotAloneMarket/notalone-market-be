@@ -3,6 +3,7 @@ package com.ddwu.notalonemarket.config;
 import com.ddwu.notalonemarket.util.JwtFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod; 
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.web.SecurityFilterChain;
@@ -34,14 +35,17 @@ public class SecurityConfig {
         http
             .cors(Customizer.withDefaults())
             .csrf(csrf -> csrf.disable())
+            .formLogin(form -> form.disable())
+            .logout(logout -> logout.disable())
+            .httpBasic(httpBasic -> httpBasic.disable())
+            .headers(headers -> headers.frameOptions(frame -> frame.disable()))
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers(
-                    "/uploads/**",
-                    "/user/login",
-                    "/user/register"
-                ).permitAll()
+                .requestMatchers("/thymeleaf-login").permitAll()
+                .requestMatchers(HttpMethod.POST, "/user/login").permitAll()
+                .requestMatchers(HttpMethod.POST, "/user/register").permitAll()
+                .requestMatchers("/uploads/**").permitAll()
 
-                // ✅ 인증 필요한 요청을 먼저 명시
+                // 인증 필요한 요청
                 .requestMatchers(
                     "/chatrooms", "/chatrooms/**",
                     "/user/profile", "/user/password",
@@ -49,11 +53,14 @@ public class SecurityConfig {
                     "/buyHistory"
                 ).authenticated()
 
-                // ✅ 그 외 공개 허용
+                // 그 외 공개
                 .requestMatchers(
                     "/posts", "/posts/**",
                     "/ws/**", "/app/**", "/topic/**"
                 ).permitAll()
+                
+                .requestMatchers("/onboarding", "/assets/**").permitAll()
+
 
                 .anyRequest().authenticated()
             )
