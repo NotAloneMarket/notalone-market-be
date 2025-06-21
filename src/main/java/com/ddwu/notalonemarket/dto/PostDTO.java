@@ -1,6 +1,7 @@
 package com.ddwu.notalonemarket.dto;
 
 public class PostDTO {
+
     private Long id;
     private String title;
     private String description;
@@ -14,7 +15,7 @@ public class PostDTO {
     private String status;
     private String categoryName;
     private Long writerId;
-    private String nickname; // 추가
+    private String nickname;
 
 
     // 생성자 (Post 엔티티 → DTO 변환 시 사용)
