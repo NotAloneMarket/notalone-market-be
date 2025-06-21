@@ -63,7 +63,7 @@ public class BuyHistoryController {
             return ResponseEntity.status(401).body("유효하지 않은 토큰입니다");
         }
 
-        Long userId = userService.findUserIdByLoginId(loginId); // 🔧 아래에 추가 코드 있음
+        Long userId = userService.findUserIdByLoginId(loginId); 
         if (userId == null) {
             return ResponseEntity.status(404).body("사용자를 찾을 수 없습니다");
         }

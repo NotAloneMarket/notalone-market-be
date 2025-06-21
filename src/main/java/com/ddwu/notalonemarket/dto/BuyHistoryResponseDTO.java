@@ -26,12 +26,10 @@ public class BuyHistoryResponseDTO {
     public Integer getPrice() { return price; }
     public Integer getQuantity() { return quantity; }
     public LocalDateTime getCompletedAt() { return completedAt; }
-    public String getImageUrl() { return imageUrl; }
 
     public void setPostId(Long postId) { this.postId = postId; }
     public void setTitle(String title) { this.title = title; }
     public void setPrice(Integer price) { this.price = price; }
     public void setQuantity(Integer quantity) { this.quantity = quantity; }
     public void setCompletedAt(LocalDateTime completedAt) { this.completedAt = completedAt; }
-    public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
 }

@@ -6,7 +6,6 @@ import com.ddwu.notalonemarket.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -35,7 +34,7 @@ public class BuyHistoryService {
             buyHistory.setUserId(userId);
             buyHistory.setPostId(post.getId());
             buyHistory.setQuantity(post.getMyQuantity());
-            buyHistory.setPrice(post.getPricePerItem()); 
+            buyHistory.setPrice(post.getPricePerItem());
             buyHistory.setCompletedAt(chatRoom.getCompletedAt());
             buyHistory.setTitle(post.getTitle());
 
@@ -43,32 +42,30 @@ public class BuyHistoryService {
             if (!exists) {
                 buyHistoryRepository.save(buyHistory);
             }
-
         }
     }
 
     public List<BuyHistoryResponseDTO> getBuyHistory(Long userId) {
-        List<ChatParticipant> participantList = chatParticipantRepository.findByUserId(userId);
+        List<BuyHistory> buyHistories = buyHistoryRepository.findByUserId(userId);
         List<BuyHistoryResponseDTO> result = new ArrayList<>();
 
-        for (ChatParticipant participant : participantList) {
-            ChatRoom chatRoom = chatRoomRepository.findById(participant.getChatId()).orElse(null);
-            if (chatRoom == null || !"Y".equals(chatRoom.getIsCompleted())) continue;
-
-            Long postId = chatRoom.getPostId();
-            Post post = postRepository.findById(postId).orElse(null);
-            if (post == null) continue;
+        for (BuyHistory history : buyHistories) {
+            // 게시글에서 이미지 경로 조회
+            String imageUrl = postRepository.findById(history.getPostId())
+                    .map(Post::getImageUrl)
+                    .orElse(null); // 게시글이 삭제된 경우 null 처리
 
             result.add(new BuyHistoryResponseDTO(
-                post.getId(),
-                post.getTitle(),
-                post.getPricePerItem(),
-                post.getMyQuantity(),
-                LocalDateTime.now(),
-                post.getImageUrl()
+                history.getPostId(),
+                history.getTitle(),
+                history.getPrice(),
+                history.getQuantity(),
+                history.getCompletedAt(),
+                imageUrl
             ));
         }
 
         return result;
     }
+
 }
