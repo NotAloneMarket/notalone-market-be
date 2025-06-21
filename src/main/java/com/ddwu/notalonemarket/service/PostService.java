@@ -80,6 +80,8 @@ public class PostService {
     }
     
     public List<PostDTO> searchPostsByKeyword(String keyword) {
+        System.out.println("🔍 검색 키워드: " + keyword);
+
         return postRepository
                 .findByTitleContainingIgnoreCaseOrDescriptionContainingIgnoreCase(keyword, keyword)
                 .stream()
@@ -91,6 +93,7 @@ public class PostService {
     }
     
     public List<PostDTO> filterPostsByCategory(String categoryName) {
+
         return postRepository
                 .findByCategoryName(categoryName)
                 .stream()
