@@ -42,16 +42,16 @@ public class UserController {
 	    return ResponseEntity.created(URI.create("/users/" + saved.getUserId())).build();
 	}
 
-	@PostMapping("/login")
-	public ResponseEntity<?> login(@RequestBody Map<String, String> body) {
-		String loginId = body.get("loginId");
-		String password = body.get("password");
-
-		return userService.login(loginId, password).map(user -> {
-			String token = jwtUtil.generateToken(user.getLoginId());
-			return ResponseEntity.ok(Map.of("token", token, "userId", user.getUserId()));
-		}).orElse(ResponseEntity.status(401).body(Map.of("error", "Invalid credentials")));
-	}
+//	@PostMapping("/login")
+//	public ResponseEntity<?> login(@RequestBody Map<String, String> body) {
+//		String loginId = body.get("loginId");
+//		String password = body.get("password");
+//
+//		return userService.login(loginId, password).map(user -> {
+//			String token = jwtUtil.generateToken(user.getLoginId());
+//			return ResponseEntity.ok(Map.of("token", token, "userId", user.getUserId()));
+//		}).orElse(ResponseEntity.status(401).body(Map.of("error", "Invalid credentials")));
+//	}
 
 	// 프로필 정보 수정 (닉네임/폰번호 + 프로필 이미지)
 	@PutMapping("/profile")
