@@ -23,97 +23,129 @@ import java.util.Map;
 @RequestMapping("/chatrooms")
 public class ChatRoomController {
 
-    @Autowired
-    private ChatRoomService chatRoomService;
+	@Autowired
+	private ChatRoomService chatRoomService;
 
-    @Autowired
-    private ChatMessageService chatMessageService;
+	@Autowired
+	private ChatMessageService chatMessageService;
 
-    @Autowired
-    private ChatParticipantService participantService;
-    
-    @Autowired
-    private JwtUtil jwtUtil;
+	@Autowired
+	private ChatParticipantService participantService;
 
-    @Autowired
-    private UserService userService;
+	@Autowired
+	private JwtUtil jwtUtil;
 
-    // 채팅방 생성
-    @PostMapping("")
-    public Long createRoom(@RequestBody ChatRoomCreateDTO dto) {
-        Long roomId = chatRoomService.createRoom(dto);
-        // 방장 자동 입장 처리
-        participantService.join(roomId, dto.getHostId(), true);
-        return roomId;
-    }
+	@Autowired
+	private UserService userService;
 
- // 유저가 참여한 채팅방 목록 조회
-    @GetMapping("")
-    public ResponseEntity<?> getRooms(@RequestHeader("Authorization") String authHeader) {
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token");
-        }
+	// 채팅방 생성
+//    @PostMapping("")
+//    public Long createRoom(@RequestBody ChatRoomCreateDTO dto) {
+//        Long roomId = chatRoomService.createRoom(dto);
+//        // 방장 자동 입장 처리
+//        participantService.join(roomId, dto.getHostId(), true);
+//        return roomId;
+//    }
+	@PostMapping("")
+	public ResponseEntity<?> createRoom(@RequestBody ChatRoomCreateDTO dto,
+	                                    @RequestHeader("Authorization") String authHeader) {
+	    System.out.println("✅ createRoom() 호출됨");
+	    System.out.println("👉 받은 postId: " + dto.getPostId());
+	    System.out.println("👉 받은 hostId: " + dto.getHostId());
+	    System.out.println("👉 Authorization: " + authHeader);
 
-        String token = authHeader.substring(7);
-        String loginId = jwtUtil.extractLoginId(token);
+	    if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+	        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("토큰 누락 또는 잘못됨");
+	    }
 
-        User user = userService.findByLoginId(loginId);
-        if (user == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
-        }
+	    // Optional: 토큰에서 loginId 추출해 검증하기
+	    try {
+	        String token = authHeader.substring(7);
+	        String loginId = jwtUtil.extractLoginId(token);
+	        User user = userService.findByLoginId(loginId);
+	        if (user == null) {
+	            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("사용자 없음");
+	        }
 
-        List<ChatRoomDTO> rooms = participantService.getRoomsByUserId(user.getUserId());
-        return ResponseEntity.ok(rooms);
-    }
+	        // 권한 있는 사용자만 채팅방 생성 가능하게 하려면 여기서 추가 검증 가능
 
-    @PostMapping("/{roomId}/join")
-    public ResponseEntity<?> joinRoom(@PathVariable Long roomId,
-                                      @RequestHeader("Authorization") String authHeader) {
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token");
-        }
+	        Long roomId = chatRoomService.createRoom(dto);
+	        participantService.join(roomId, dto.getHostId(), true);
 
-        String token = authHeader.substring(7);
-        String loginId = jwtUtil.extractLoginId(token);
+	        return ResponseEntity.ok(Map.of("roomId", roomId));
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("서버 에러: " + e.getMessage());
+	    }
+	}
 
-        User user = userService.findByLoginId(loginId);
-        if (user == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
-        }
 
-        Long userId = user.getUserId();
+	
 
-        if (!participantService.isUserInRoom(userId, roomId)) {
-            participantService.join(roomId, userId, false);
-        }
+	// 유저가 참여한 채팅방 목록 조회
+	@GetMapping("")
+	public ResponseEntity<?> getRooms(@RequestHeader("Authorization") String authHeader) {
+		if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token");
+		}
 
-        return ResponseEntity.ok(Map.of("message", "joined"));
-    }
+		String token = authHeader.substring(7);
+		String loginId = jwtUtil.extractLoginId(token);
 
-    //특정 채팅방의 메시지 반환
-    @GetMapping("/{roomId}/messages")
-    public List<MessageResponseDTO> getMessages(@PathVariable Long roomId) {
-        return chatMessageService.getMessageDTOsByRoomId(roomId);
-    }
+		User user = userService.findByLoginId(loginId);
+		if (user == null) {
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
+		}
 
-    // 채팅방 거래 완료 처리
-    @PutMapping("/{roomId}/complete")
-    public String completeRoom(@PathVariable Long roomId) {
-        chatRoomService.completeRoom(roomId);
-        return "completed";
-    }
+		List<ChatRoomDTO> rooms = participantService.getRoomsByUserId(user.getUserId());
+		return ResponseEntity.ok(rooms);
+	}
 
-    // 채팅방 참여자 수 반환 API
-    @GetMapping("/{roomId}/count")
-    public ResponseEntity<?> countParticipants(@PathVariable Long roomId) {
-        try {
-            long count = participantService.countParticipantsByRoomId(roomId);
-            return ResponseEntity.ok(Map.of("participantCount", count));
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(Map.of("error", e.getMessage()));
-        }
-    }
+	@PostMapping("/{roomId}/join")
+	public ResponseEntity<?> joinRoom(@PathVariable Long roomId, @RequestHeader("Authorization") String authHeader) {
+		if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token");
+		}
 
+		String token = authHeader.substring(7);
+		String loginId = jwtUtil.extractLoginId(token);
+
+		User user = userService.findByLoginId(loginId);
+		if (user == null) {
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
+		}
+
+		Long userId = user.getUserId();
+
+		if (!participantService.isUserInRoom(userId, roomId)) {
+			participantService.join(roomId, userId, false);
+		}
+
+		return ResponseEntity.ok(Map.of("message", "joined"));
+	}
+
+	// 특정 채팅방의 메시지 반환
+	@GetMapping("/{roomId}/messages")
+	public List<MessageResponseDTO> getMessages(@PathVariable Long roomId) {
+		return chatMessageService.getMessageDTOsByRoomId(roomId);
+	}
+
+	// 채팅방 거래 완료 처리
+	@PutMapping("/{roomId}/complete")
+	public String completeRoom(@PathVariable Long roomId) {
+		chatRoomService.completeRoom(roomId);
+		return "completed";
+	}
+
+	// 채팅방 참여자 수 반환 API
+	@GetMapping("/{roomId}/count")
+	public ResponseEntity<?> countParticipants(@PathVariable Long roomId) {
+		try {
+			long count = participantService.countParticipantsByRoomId(roomId);
+			return ResponseEntity.ok(Map.of("participantCount", count));
+		} catch (Exception e) {
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", e.getMessage()));
+		}
+	}
 
 }

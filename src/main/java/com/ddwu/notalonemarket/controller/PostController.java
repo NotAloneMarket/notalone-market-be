@@ -12,6 +12,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,9 +46,9 @@ public class PostController {
     private ChatRoomService chatRoomService;
 
 
-    // 게시글 작성 (이미지 포함)
+ // 게시글 작성 (이미지 포함)
     @PostMapping("/write")
-    public Long createPost(
+    public ResponseEntity<?> createPost(
             @RequestParam("title") String title,
             @RequestParam("description") String description,
             @RequestParam("totalAmount") Integer totalAmount,
@@ -97,8 +98,10 @@ public class PostController {
         post.setImageUrl(imageUrl);
         post.setWriterId(user.getUserId());
 
-        return postService.createPost(post);
+        Long postId = postService.createPost(post);
+        return ResponseEntity.ok(Map.of("postId", postId));
     }
+
 
 
 
@@ -154,7 +157,9 @@ public class PostController {
     // 카테고리로 필터링
     @GetMapping(params = "category")
     public List<PostDTO> filterPostsByCategory(@RequestParam String category) {
-        return postService.filterPostsByCategory(category);
+    	 return postService.filterPostsByCategory(category).stream()
+    	            .filter(dto -> "selling".equalsIgnoreCase(dto.getStatus()))
+    	            .collect(Collectors.toList());
     }
     
     //채팅방 id로 postDTO 찾기

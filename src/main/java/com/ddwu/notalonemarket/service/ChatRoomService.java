@@ -17,6 +17,11 @@ public class ChatRoomService {
     private ChatRoomRepository chatRoomRepository;
 
     public Long createRoom(ChatRoomCreateDTO dto) {
+    	
+    	 // ✅ 중복 생성 방지 로직 추가
+        if (chatRoomRepository.existsByPostId(dto.getPostId())) {
+            throw new IllegalArgumentException("이미 해당 게시글에 대한 채팅방이 존재합니다.");
+        }
         ChatRoom chatRoom = new ChatRoom(
                 dto.getPostId(),
                 dto.getHostId(),
