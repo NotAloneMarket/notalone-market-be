@@ -39,6 +39,9 @@ public class User {
     @Column(length = 500)
     private String profileImageUrl;
     
+    public User() {
+    }
+    
     public User(String loginId, String password, String nickname, String phoneNum, String accountNumber) {
         this.loginId = loginId;
         this.password = password;
