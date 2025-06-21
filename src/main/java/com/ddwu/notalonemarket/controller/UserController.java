@@ -30,15 +30,8 @@ public class UserController {
 
 	@PostMapping("/register")
 	public ResponseEntity<?> register(@RequestBody UserRegisterDTO dto) {
-		User user = new User();
-		user.setLoginId(dto.getLoginId());
-		user.setPassword(dto.getPassword());
-		user.setNickname(dto.getNickname());
-		user.setPhoneNum(dto.getPhoneNum());
-		user.setAccountNumber(dto.getAccountNumber());
-
-		User saved = userService.register(user);
-		return ResponseEntity.created(URI.create("/users/" + saved.getUserId())).build();
+	    User saved = userService.register(dto);
+	    return ResponseEntity.created(URI.create("/users/" + saved.getUserId())).build();
 	}
 
 	@PostMapping("/login")

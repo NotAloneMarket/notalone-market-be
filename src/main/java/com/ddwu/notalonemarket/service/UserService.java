@@ -1,6 +1,7 @@
 package com.ddwu.notalonemarket.service;
 
 import com.ddwu.notalonemarket.domain.User;
+import com.ddwu.notalonemarket.dto.UserRegisterDTO;
 import com.ddwu.notalonemarket.repository.UserRepository;
 import com.ddwu.notalonemarket.util.JwtUtil;
 
@@ -30,10 +31,17 @@ public class UserService {
         throw new IllegalArgumentException("Invalid credentials");
     }
 
-    public User register(User user) {
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
+    public User register(UserRegisterDTO dto) {
+        User user = new User(
+            dto.getLoginId(),
+            passwordEncoder.encode(dto.getPassword()),
+            dto.getNickname(),
+            dto.getPhoneNum(),
+            dto.getAccountNumber()
+        );
         return userRepository.save(user);
     }
+
 
     public Optional<User> login(String loginId, String rawPw) {
         Optional<User> optUser = userRepository.findByLoginId(loginId);
