@@ -43,6 +43,7 @@ public class SecurityConfig {
                 .requestMatchers(
                     "/ws/**", "/app/**", "/topic/**"
                 ).permitAll()
+                .requestMatchers("/posts/my").authenticated() // 위치 중요 
                 .requestMatchers(
                     "/posts", "/posts/**",
                     "/chatrooms", "/chatrooms/**"
@@ -53,6 +54,7 @@ public class SecurityConfig {
                     "/buyHistory"
                 ).authenticated()
                 .anyRequest().authenticated()
+
             )
             .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
