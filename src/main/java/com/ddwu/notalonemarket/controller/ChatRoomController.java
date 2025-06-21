@@ -1,5 +1,6 @@
 package com.ddwu.notalonemarket.controller;
 
+import com.ddwu.notalonemarket.domain.ChatRoom;
 import com.ddwu.notalonemarket.domain.User;
 import com.ddwu.notalonemarket.dto.ChatRoomCreateDTO;
 import com.ddwu.notalonemarket.dto.ChatRoomDTO;
@@ -92,6 +93,15 @@ public class ChatRoomController {
 		List<ChatRoomDTO> rooms = participantService.getRoomsByUserId(user.getUserId());
 		return ResponseEntity.ok(rooms);
 	}
+	
+	@GetMapping("/{roomId}")
+	public ResponseEntity<?> getChatRoomInfo(@PathVariable Long roomId) {
+	    ChatRoom room = chatRoomService.getRoom(roomId);
+	    return ResponseEntity.ok(Map.of(
+	        "isCompleted", room.getIsCompleted()
+	    ));
+	}
+
 
 	@PostMapping("/{roomId}/join")
 	public ResponseEntity<?> joinRoom(@PathVariable Long roomId, @RequestHeader("Authorization") String authHeader) {
