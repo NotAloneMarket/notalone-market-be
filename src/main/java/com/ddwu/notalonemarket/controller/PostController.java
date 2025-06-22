@@ -4,9 +4,12 @@ import com.ddwu.notalonemarket.domain.Post;
 import com.ddwu.notalonemarket.domain.User;
 import com.ddwu.notalonemarket.dto.PostDTO;
 import com.ddwu.notalonemarket.dto.PostWriteDTO;
+import com.ddwu.notalonemarket.mapper.PostMapper;
+
 import com.ddwu.notalonemarket.repository.UserRepository;
 import com.ddwu.notalonemarket.service.ChatRoomService;
 import com.ddwu.notalonemarket.service.PostService;
+import com.ddwu.notalonemarket.service.PostServiceMyBatis;
 import com.ddwu.notalonemarket.service.UserService;
 
 import java.io.File;
@@ -46,6 +49,9 @@ public class PostController {
 
     @Autowired
     private ChatRoomService chatRoomService;
+    
+    @Autowired
+    private PostServiceMyBatis postServiceMyBatis;
 
 
  // 게시글 작성 (이미지 포함)
@@ -90,23 +96,24 @@ public class PostController {
         post.setImageUrl(imageUrl);
         post.setWriterId(user.getUserId());
 
-        Long postId = postService.createPost(post);
+        Long postId = postServiceMyBatis.createPost(post);
         return ResponseEntity.ok(Map.of("postId", postId));
     }
 
 
 
-
     @GetMapping("")
     public List<PostDTO> getAllPosts() {
-        return postService.getAllPosts();
+        return postServiceMyBatis.getAllSellingPosts();
     }
+
 
     // 단일 게시글 상세 조회
     @GetMapping("/{id}")
     public PostDTO getPostDetail(@PathVariable Long id) {
-        return postService.getPostDetail(id);
+        return postServiceMyBatis.getPostDetail(id);
     }
+
 
     // 게시글 상태 완료 처리
     @PostMapping("/{id}/complete")
