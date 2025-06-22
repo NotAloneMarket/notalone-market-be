@@ -43,6 +43,7 @@ public class PostServiceMyBatis {
         List<Post> postList = postMapper.selectAllSellingPosts();
 
         return postList.stream()
+        		.filter(post -> post.getCategoryId() != null && post.getWriterId() != null) 
                 .map(post -> {
                     String categoryName = categoryRepository.findById(post.getCategoryId())
                             .map(Category::getName)

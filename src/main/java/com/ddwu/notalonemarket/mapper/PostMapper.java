@@ -1,4 +1,3 @@
-//mybatis
 package com.ddwu.notalonemarket.mapper;
 
 import com.ddwu.notalonemarket.domain.Post;
