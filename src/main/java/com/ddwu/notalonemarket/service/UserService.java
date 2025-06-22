@@ -95,7 +95,7 @@ public class UserService {
     
     public User findByLoginId(String loginId) {
         Optional<User> optionalUser = userRepository.findByLoginId(loginId);
-        return optionalUser.orElse(null); // 없으면 null 반환 (Controller에서 처리 가능)
+        return optionalUser.orElse(null);
     }
 
 

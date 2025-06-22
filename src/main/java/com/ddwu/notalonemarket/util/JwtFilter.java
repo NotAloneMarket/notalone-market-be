@@ -33,7 +33,7 @@ public class JwtFilter extends OncePerRequestFilter {
 	    String upgrade = request.getHeader("Upgrade");
 	    String authHeader = request.getHeader("Authorization");
 
-	    // ✅ WebSocket 요청은 필터 통과
+	    // WebSocket 요청은 필터 통과
 	    if (
 	        (upgrade != null && upgrade.equalsIgnoreCase("websocket")) ||
 	        path.startsWith("/ws") ||
@@ -46,7 +46,6 @@ public class JwtFilter extends OncePerRequestFilter {
 	        return;
 	    }
 
-	    // ✅ JWT 인증 없이 허용할 경로는 바로 통과
 	    if (
 	        path.equals("/thymeleaf-login") ||
 	        path.equals("/user/login") ||
@@ -60,7 +59,7 @@ public class JwtFilter extends OncePerRequestFilter {
 	        return;
 	    }
 
-	    // ✅ JWT 인증 처리
+	    // JWT 인증 처리
 	    if (authHeader != null && authHeader.startsWith("Bearer ")) {
 	        String token = authHeader.substring(7);
 	        String loginId = jwtUtil.validateTokenAndGetLoginId(token);
@@ -73,7 +72,7 @@ public class JwtFilter extends OncePerRequestFilter {
 	                authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 	                SecurityContextHolder.getContext().setAuthentication(authentication);
 	            }
-	            // ✅ 무조건 다음 필터로 넘기기 (multipart도 포함)
+	            // 무조건 다음 필터로 넘기기
 	            filterChain.doFilter(request, response);
 	        } else {
 	            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "유효하지 않은 토큰입니다.");

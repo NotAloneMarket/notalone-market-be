@@ -38,10 +38,10 @@ public class JwtUtil {
                     .getBody()
                     .getSubject();
 
-            System.out.println("✅ 유효한 JWT. loginId = " + loginId);
+            System.out.println("유효한 JWT. loginId = " + loginId);
             return loginId;
         } catch (Exception e) {
-            System.out.println("❌ JWT 유효성 검증 실패: " + e.getMessage());
+            System.out.println("JWT 유효성 검증 실패: " + e.getMessage());
             return null;
         }
     }
@@ -64,7 +64,7 @@ public class JwtUtil {
                 .setSubject(loginId)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + expirationMs))
-                .signWith(secretKey, SignatureAlgorithm.HS256) // 🔥 순서 주의!
+                .signWith(secretKey, SignatureAlgorithm.HS256)
                 .compact();
     }
 }

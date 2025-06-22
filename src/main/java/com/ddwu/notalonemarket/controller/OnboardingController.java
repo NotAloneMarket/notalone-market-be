@@ -8,6 +8,6 @@ public class OnboardingController {
 
     @GetMapping("/onboarding")
     public String onboardingPage() {
-        return "onboarding"; // → templates/onboarding.html
+        return "onboarding";
     }
 }

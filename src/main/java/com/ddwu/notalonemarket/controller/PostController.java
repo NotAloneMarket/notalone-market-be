@@ -51,7 +51,7 @@ public class PostController {
     @Autowired
     private JwtUtil jwtUtil;
 
-    // ✅ 게시글 작성 (이미지 포함)
+    //게시글 작성 (이미지 포함)
     @PostMapping("/write")
     public ResponseEntity<?> createPost(
             @Valid @ModelAttribute PostWriteDTO dto,
@@ -62,7 +62,7 @@ public class PostController {
             return ResponseEntity.badRequest().body(bindingResult.getAllErrors());
         }
 
-        // ✅ JWT 토큰 추출 및 사용자 조회
+        //JWT 토큰 추출 및 사용자 조회
         String authHeader = request.getHeader("Authorization");
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Authorization header is missing or invalid");
@@ -73,13 +73,13 @@ public class PostController {
         User user = userRepository.findByLoginId(loginId)
                 .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
 
-        // ✅ 이미지 업로드 (Cloudinary)
+        //이미지 업로드 (Cloudinary)
         String imageUrl = null;
         if (dto.getImage() != null && !dto.getImage().isEmpty()) {
             imageUrl = imageUploadService.uploadImage(dto.getImage());
         }
 
-        // ✅ 게시글 객체 생성 및 저장
+        //게시글 객체 생성 및 저장
         Post post = new Post();
         post.setTitle(dto.getTitle());
         post.setDescription(dto.getDescription());
@@ -97,26 +97,26 @@ public class PostController {
         return ResponseEntity.ok(Map.of("postId", postId));
     }
 
-    // ✅ 전체 판매 중 게시글 조회
+    //전체 판매 중 게시글 조회
     @GetMapping("")
     public List<PostDTO> getAllPosts() {
         return postServiceMyBatis.getAllSellingPosts();
     }
 
-    // ✅ 단일 게시글 상세 조회
+    //단일 게시글 상세 조회
     @GetMapping("/{id}")
     public PostDTO getPostDetail(@PathVariable Long id) {
         return postServiceMyBatis.getPostDetail(id);
     }
 
-    // ✅ 게시글 완료 처리
+    //게시글 완료 처리
     @PostMapping("/{id}/complete")
     public String completePost(@PathVariable Long id) {
         postService.completePost(id);
         return "success";
     }
 
-    // ✅ 내가 쓴 게시글 조회
+    //내가 쓴 게시글 조회
     @GetMapping("/my")
     public ResponseEntity<?> getMyPosts(@RequestHeader("Authorization") String authHeader) {
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
@@ -134,13 +134,13 @@ public class PostController {
         return ResponseEntity.ok(myPosts);
     }
 
-    // ✅ 키워드 검색
+    //키워드 검색
     @GetMapping(params = "keyword")
     public List<PostDTO> searchPostsByKeyword(@RequestParam String keyword) {
         return postServiceMyBatis.searchPostsByKeyword(keyword);
     }
 
-    // ✅ 카테고리 필터링
+    //카테고리 필터링
     @GetMapping(params = "category")
     public List<PostDTO> filterPostsByCategory(@RequestParam String category) {
         return postServiceMyBatis.filterPostsByCategory(category).stream()
@@ -148,7 +148,7 @@ public class PostController {
                 .collect(Collectors.toList());
     }
 
-    // ✅ 채팅방 ID → 게시글 DTO 조회
+    //채팅방 ID → 게시글 DTO 조회
     @GetMapping("/from-chatroom/{chatRoomId}")
     public ResponseEntity<?> getPostByChatRoomId(@PathVariable Long chatRoomId) {
         try {

@@ -85,27 +85,27 @@ public class UserController {
 
 	@GetMapping("/me")
 	public ResponseEntity<?> getMyInfo(Authentication authentication) {
-	    System.out.println("🔍 [GET /user/me] 호출됨");
+	    System.out.println("[GET /user/me] 호출됨");
 	    
 	    if (authentication == null) {
-	        System.out.println("❌ authentication == null (SecurityContext에 인증 정보 없음)");
+	        System.out.println("authentication == null (SecurityContext에 인증 정보 없음)");
 	        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("인증 정보 없음");
 	    }
 
-	    System.out.println("🔍 authentication.getPrincipal(): " + authentication.getPrincipal());
-	    System.out.println("🔍 authentication.getAuthorities(): " + authentication.getAuthorities());
-	    System.out.println("🔍 authentication.getClass(): " + authentication.getClass().getName());
+	    System.out.println("authentication.getPrincipal(): " + authentication.getPrincipal());
+	    System.out.println("authentication.getAuthorities(): " + authentication.getAuthorities());
+	    System.out.println("authentication.getClass(): " + authentication.getClass().getName());
 
 	    String loginId = authentication.getPrincipal().toString();
-	    System.out.println("✅ 인증된 사용자 loginId: " + loginId);
+	    System.out.println("인증된 사용자 loginId: " + loginId);
 
 	    User user = userService.findByLoginId(loginId);
 	    if (user == null) {
-	        System.out.println("❌ 해당 loginId에 해당하는 사용자 없음");
+	        System.out.println("해당 loginId에 해당하는 사용자 없음");
 	        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
 	    }
 
-	    System.out.println("✅ 사용자 정보 조회 성공");
+	    System.out.println("사용자 정보 조회 성공");
 
 	    return ResponseEntity.ok(Map.of(
 	        "userId", user.getUserId(),

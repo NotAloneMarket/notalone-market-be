@@ -157,7 +157,7 @@ public class ChatRoomController {
 	    }
 	}
 	
-	// 디테일 페이지 동그라미 
+	// 디테일 페이지에 채팅방인원수 -> 동그라미 
 	@GetMapping("/{roomId}/count")
 	public ResponseEntity<?> countParticipants(@PathVariable Long roomId, @RequestHeader("Authorization") String authHeader) {
 	    if (authHeader == null || !authHeader.startsWith("Bearer ")) {

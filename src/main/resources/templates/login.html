@@ -101,7 +101,7 @@
 
     <div style="text-align: center" class="login-title">로그인</div>
 
-    <!-- ✅ method/action 제거 -->
+    <!-- method/action 제거 -->
     <form id="loginForm">
       <div class="input-group">
         <span class="icon">✉️</span>
@@ -125,13 +125,13 @@
     </div>
   </div>
 
-  <!-- ✅ DOMContentLoaded로 JS가 DOM 렌더 이후 실행되게 함 -->
+  <!-- DOMContentLoaded로 JS가 DOM 렌더 이후 실행되게 함 -->
   <script>
     document.addEventListener("DOMContentLoaded", function () {
       const loginForm = document.getElementById("loginForm");
 
       if (!loginForm) {
-        console.error("❌ loginForm이 DOM에 존재하지 않음");
+        console.error("loginForm이 DOM에 존재하지 않음");
         return;
       }
 
@@ -141,7 +141,7 @@
         const loginId = document.getElementById("loginId").value;
         const password = document.getElementById("password").value;
 
-        console.log("✅ 로그인 요청 시작됨:", loginId);
+        console.log("로그인 요청 시작됨:", loginId);
 
         try {
           const res = await fetch("/user/login", {
@@ -149,19 +149,19 @@
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ loginId, password })
           });
-          console.log("📡 응답 status:", res.status); // 여기에 찍어봐
+          console.log("응답 status:", res.status);
 
           if (res.ok) {
             const data = await res.json();
-            console.log("✅ 로그인 성공! 토큰:", data.token);
+            console.log("로그인 성공! 토큰:", data.token);
             localStorage.setItem("token", data.token);
             localStorage.setItem("userId", data.userId);
             window.location.href = `http://localhost:5173/login?token=${data.token}&userId=${data.userId}`;
           } else {
-            alert("❌ 로그인 실패! 아이디 또는 비밀번호를 확인하세요.");
+            alert("로그인 실패! 아이디 또는 비밀번호를 확인하세요.");
           }
         } catch (err) {
-          console.error("🚨 로그인 중 오류 발생:", err);
+          console.error("로그인 중 오류 발생:", err);
           alert("서버 오류가 발생했습니다.");
         }
       });
