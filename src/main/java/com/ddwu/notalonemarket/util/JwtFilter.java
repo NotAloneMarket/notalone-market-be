@@ -51,7 +51,7 @@ public class JwtFilter extends OncePerRequestFilter {
 	        path.equals("/thymeleaf-login") ||
 	        path.equals("/user/login") ||
 	        path.equals("/user/register") ||
-	        path.startsWith("/posts") ||
+	        path.startsWith("/posts") && request.getMethod().equals("GET") || // GET만 허용
 	        path.startsWith("/uploads") ||
 	        path.startsWith("/assets") ||
 	        path.equals("/onboarding")
@@ -65,13 +65,15 @@ public class JwtFilter extends OncePerRequestFilter {
 	        String token = authHeader.substring(7);
 	        String loginId = jwtUtil.validateTokenAndGetLoginId(token);
 
-	        if (loginId != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-	            UsernamePasswordAuthenticationToken authentication =
-	                    new UsernamePasswordAuthenticationToken(
-	                            loginId, null, List.of(new SimpleGrantedAuthority("ROLE_USER")));
-	            authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-	            SecurityContextHolder.getContext().setAuthentication(authentication);
-
+	        if (loginId != null) {
+	            if (SecurityContextHolder.getContext().getAuthentication() == null) {
+	                UsernamePasswordAuthenticationToken authentication =
+	                        new UsernamePasswordAuthenticationToken(
+	                                loginId, null, List.of(new SimpleGrantedAuthority("ROLE_USER")));
+	                authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+	                SecurityContextHolder.getContext().setAuthentication(authentication);
+	            }
+	            // ✅ 무조건 다음 필터로 넘기기 (multipart도 포함)
 	            filterChain.doFilter(request, response);
 	        } else {
 	            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "유효하지 않은 토큰입니다.");
@@ -80,6 +82,7 @@ public class JwtFilter extends OncePerRequestFilter {
 	        response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "인증 정보가 없습니다.");
 	    }
 	}
+
 
 
 
