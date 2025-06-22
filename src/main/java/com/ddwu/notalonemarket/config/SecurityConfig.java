@@ -19,65 +19,72 @@ import java.util.List;
 @Configuration
 public class SecurityConfig {
 
-    private final JwtFilter jwtFilter;
+   private final JwtFilter jwtFilter;
 
-    public SecurityConfig(JwtFilter jwtFilter) {
-        this.jwtFilter = jwtFilter;
-    }
+   public SecurityConfig(JwtFilter jwtFilter) {
+      this.jwtFilter = jwtFilter;
+   }
 
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
+   @Bean
+   public PasswordEncoder passwordEncoder() {
+      return new BCryptPasswordEncoder();
+   }
 
-    @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http.cors(Customizer.withDefaults())
-            .csrf(csrf -> csrf.disable())
-            .formLogin(form -> form.disable())
-            .logout(logout -> logout.disable())
-            .httpBasic(httpBasic -> httpBasic.disable())
+   @Bean
+   public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+      http.cors(Customizer.withDefaults()).csrf(csrf -> csrf.disable()).formLogin(form -> form.disable())
+            .logout(logout -> logout.disable()).httpBasic(httpBasic -> httpBasic.disable())
             .headers(headers -> headers.frameOptions(frame -> frame.disable()))
 
             .authorizeHttpRequests(auth -> auth
-                // 공개 접근 허용
-                .requestMatchers("/thymeleaf-login", "/onboarding").permitAll()
-                .requestMatchers("/assets/**", "/uploads/**").permitAll()
-                .requestMatchers(HttpMethod.POST, "/user/login").permitAll()
-                .requestMatchers(HttpMethod.POST, "/user/register").permitAll()
+                   .requestMatchers("/thymeleaf-login").permitAll()
+                   .requestMatchers("/assets/**", "/uploads/**").permitAll()
+                   .requestMatchers(HttpMethod.POST, "/user/login").permitAll()
+                   .requestMatchers(HttpMethod.POST, "/user/register").permitAll()
+                   .requestMatchers(HttpMethod.POST, "/user/login").permitAll()
+                   .requestMatchers(HttpMethod.POST, "/user/register").permitAll()
+                   .requestMatchers("/uploads/**").permitAll()
+                   .requestMatchers(HttpMethod.GET, "/posts/**").permitAll()
+                   .requestMatchers(HttpMethod.GET, "/posts").permitAll()
+                   .requestMatchers(HttpMethod.POST, "/posts/write").authenticated()
+                   .requestMatchers(
+                       "/chatrooms", "/chatrooms/**",
+                       "/user/profile", "/user/password", "/user/me",
+                       "/posts/my", "/chatrooms/*/messages", "/buyHistory"
+                   ).authenticated()
 
-                // 게시글 조회는 허용
-                .requestMatchers(HttpMethod.GET, "/posts/**").permitAll()
-                .requestMatchers(HttpMethod.GET, "/posts").permitAll()
+                   // ✅ WebSocket 연결 관련 경로 허용
+                   .requestMatchers("/ws/**", "/sockjs/**", "/websocket/**", "/info/**").permitAll()
 
-                // 인증 필요한 요청
-                .requestMatchers(HttpMethod.POST, "/posts/write").authenticated()
-                .requestMatchers(
-                    "/chatrooms", "/chatrooms/**",
-                    "/user/profile", "/user/password", "/user/me",
-                    "/posts/my", "/chatrooms/*/messages", "/buyHistory"
-                ).authenticated()
+                   // 게시글 관련
+                   .requestMatchers(HttpMethod.POST, "/posts/write").authenticated()
+                   .requestMatchers(HttpMethod.GET, "/posts/**").permitAll()
+                   .requestMatchers(HttpMethod.GET, "/posts").permitAll()
 
-                // 그 외 요청은 인증 필요
-                .anyRequest().authenticated()
-            )
+                   // 인증 필요한 요청
+                   .requestMatchers("/chatrooms", "/chatrooms/**", "/user/profile", "/user/password",
+                       "/user/me", "/posts/my", "/chatrooms/*/messages", "/buyHistory")
+                   .authenticated()
+
+                   .requestMatchers("/onboarding", "/assets/**").permitAll()
+                   .anyRequest().authenticated())
 
             .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
-        return http.build();
-    }
+      return http.build();
+   }
 
-    @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration config = new CorsConfiguration();
-        config.setAllowCredentials(true);
-        config.setAllowedOrigins(List.of("http://localhost:5173"));
-        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        config.setAllowedHeaders(List.of("*"));
-        config.setExposedHeaders(List.of("Authorization"));
+   @Bean
+   public CorsConfigurationSource corsConfigurationSource() {
+      CorsConfiguration config = new CorsConfiguration();
+      config.setAllowCredentials(true);
+      config.setAllowedOrigins(List.of("http://localhost:5173"));
+      config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+      config.setAllowedHeaders(List.of("*"));
+      config.setExposedHeaders(List.of("Authorization"));
 
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", config);
-        return source;
-    }
+      UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+      source.registerCorsConfiguration("/**", config);
+      return source;
+   }
 }
