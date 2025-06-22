@@ -29,18 +29,21 @@ public class JwtFilter extends OncePerRequestFilter {
                                     FilterChain filterChain)
                                     throws ServletException, IOException {
         String path = request.getRequestURI();
+        String authHeader = request.getHeader("Authorization");
 
-        // 공개 경로 예외 처리
-        if (path.equals("/thymeleaf-login") || path.startsWith("/login") ||  path.equals("/user/login") || path.equals("/user/register") || path.startsWith("/uploads")) {
+        System.out.println("👉 요청 경로: " + path);
+        System.out.println("👉 Authorization 헤더: " + authHeader);
+
+        if (path.equals("/thymeleaf-login") || path.startsWith("/login") || path.equals("/user/login") || path.equals("/user/register") || path.startsWith("/uploads")) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        String authHeader = request.getHeader("Authorization");
-
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             String token = authHeader.substring(7);
             String loginId = jwtUtil.validateTokenAndGetLoginId(token);
+
+            System.out.println("👉 JWT로부터 추출한 loginId: " + loginId);
 
             if (loginId != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                 UsernamePasswordAuthenticationToken authentication =
@@ -52,10 +55,17 @@ public class JwtFilter extends OncePerRequestFilter {
 
                 authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authentication);
+
+                System.out.println("✅ SecurityContextHolder에 인증 정보 설정 완료");
+            } else {
+                System.out.println("⚠️ 이미 인증된 사용자이거나 loginId가 null입니다.");
             }
+        } else {
+            System.out.println("⚠️ Authorization 헤더 없음 또는 형식 오류");
         }
 
         filterChain.doFilter(request, response);
     }
+
 
 }

@@ -47,11 +47,13 @@ public class SecurityConfig {
 
                 // 인증 필요한 요청
                 .requestMatchers(
-                    "/chatrooms", "/chatrooms/**",
-                    "/user/profile", "/user/password",
-                    "/posts/my", "/chatrooms/*/messages",
-                    "/buyHistory"
+                	    "/chatrooms", "/chatrooms/**",
+                	    "/user/profile", "/user/password",
+                	    "/user/me",
+                	    "/posts/my", "/chatrooms/*/messages",
+                	    "/buyHistory"
                 ).authenticated()
+
 
                 // 그 외 공개
                 .requestMatchers(
