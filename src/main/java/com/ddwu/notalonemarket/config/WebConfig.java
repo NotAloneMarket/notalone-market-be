@@ -19,10 +19,13 @@ public class WebConfig implements WebMvcConfigurer {
     // 정적 리소스 핸들러 추가 (업로드된 이미지 경로 서빙)
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        // 사용자 홈 디렉토리에 저장된 업로드 경로 (예: /Users/you/notalonemarket/uploads)
         String uploadPath = System.getProperty("user.home") + "/notalonemarket/uploads/";
 
         registry.addResourceHandler("/uploads/**")
                 .addResourceLocations("file:" + uploadPath);
+
+        registry.addResourceHandler("/assets/**")
+                .addResourceLocations("classpath:/static/assets/");
     }
+
 }
