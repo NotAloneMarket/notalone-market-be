@@ -78,15 +78,11 @@ public class UserController {
 
 	    return ResponseEntity.ok(Map.of("message", "프로필 수정 완료"));
 	}
-
-
-
-
-
+	
 	@GetMapping("/me")
 	public ResponseEntity<?> getMyInfo(Authentication authentication) {
 	    System.out.println("[GET /user/me] 호출됨");
-	    
+
 	    if (authentication == null) {
 	        System.out.println("authentication == null (SecurityContext에 인증 정보 없음)");
 	        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("인증 정보 없음");
@@ -107,16 +103,14 @@ public class UserController {
 
 	    System.out.println("사용자 정보 조회 성공");
 
-	    return ResponseEntity.ok(Map.of(
-	        "userId", user.getUserId(),
-	        "loginId", user.getLoginId(),
-	        "nickname", user.getNickname(),
-	        "phoneNum", user.getPhoneNum(),
-	        "profileImageUrl", user.getProfileImageUrl()
-	    ));
+	    // null-safe Map 생성
+	    Map<String, Object> result = new java.util.HashMap<>();
+	    result.put("userId", user.getUserId());
+	    result.put("loginId", user.getLoginId());
+	    result.put("nickname", user.getNickname() != null ? user.getNickname() : "");
+	    result.put("phoneNum", user.getPhoneNum() != null ? user.getPhoneNum() : "");
+	    result.put("profileImageUrl", user.getProfileImageUrl() != null ? user.getProfileImageUrl() : "");
+
+	    return ResponseEntity.ok(result);
 	}
-
-
-
-
 }
