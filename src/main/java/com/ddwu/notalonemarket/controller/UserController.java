@@ -7,12 +7,14 @@ import com.ddwu.notalonemarket.util.JwtUtil;
 
 import jakarta.validation.Valid;
 
+import org.springframework.security.core.Authentication; 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
 
 import java.io.File;
 import java.io.IOException;
@@ -99,21 +101,39 @@ public class UserController {
 
 
 	@GetMapping("/me")
-	public ResponseEntity<?> getMyInfo(@RequestHeader("Authorization") String authHeader) {
-		if (!authHeader.startsWith("Bearer ")) {
-			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token");
-		}
+	public ResponseEntity<?> getMyInfo(Authentication authentication) {
+	    System.out.println("🔍 [GET /user/me] 호출됨");
+	    
+	    if (authentication == null) {
+	        System.out.println("❌ authentication == null (SecurityContext에 인증 정보 없음)");
+	        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("인증 정보 없음");
+	    }
 
-		String token = authHeader.substring(7);
-		String loginId = jwtUtil.extractLoginId(token); // 토큰에서 loginId 추출
+	    System.out.println("🔍 authentication.getPrincipal(): " + authentication.getPrincipal());
+	    System.out.println("🔍 authentication.getAuthorities(): " + authentication.getAuthorities());
+	    System.out.println("🔍 authentication.getClass(): " + authentication.getClass().getName());
 
-		User user = userService.findByLoginId(loginId);
-		if (user == null) {
-			return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
-		}
+	    String loginId = authentication.getPrincipal().toString();
+	    System.out.println("✅ 인증된 사용자 loginId: " + loginId);
 
-		return ResponseEntity.ok(Map.of("userId", user.getUserId(), "loginId", user.getLoginId(), "nickname", user.getNickname(), "phoneNum",
-				user.getPhoneNum(), "profileImageUrl", user.getProfileImageUrl()));
+	    User user = userService.findByLoginId(loginId);
+	    if (user == null) {
+	        System.out.println("❌ 해당 loginId에 해당하는 사용자 없음");
+	        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
+	    }
+
+	    System.out.println("✅ 사용자 정보 조회 성공");
+
+	    return ResponseEntity.ok(Map.of(
+	        "userId", user.getUserId(),
+	        "loginId", user.getLoginId(),
+	        "nickname", user.getNickname(),
+	        "phoneNum", user.getPhoneNum(),
+	        "profileImageUrl", user.getProfileImageUrl()
+	    ));
 	}
+
+
+
 
 }

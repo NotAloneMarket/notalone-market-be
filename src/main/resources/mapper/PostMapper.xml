@@ -4,17 +4,24 @@
     "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="com.ddwu.notalonemarket.mapper.PostMapper">
-    <insert id="insertPost" parameterType="com.ddwu.notalonemarket.domain.Post" useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO Post (
-            title, description, total_amount, total_quantity, my_quantity,
-            price_per_item, participant_limit, product_url, image_url,
-            status, category_id, writer_id
-        ) VALUES (
-            #{title}, #{description}, #{totalAmount}, #{totalQuantity}, #{myQuantity},
-            #{pricePerItem}, #{participantLimit}, #{productUrl}, #{imageUrl},
-            #{status}, #{categoryId}, #{writerId}
-        )
-    </insert>
+    <insert id="insertPost" parameterType="com.ddwu.notalonemarket.domain.Post" keyProperty="id">
+    
+    <!-- 시퀀스에서 ID 미리 받아오기 -->
+    <selectKey resultType="long" order="BEFORE" keyProperty="id">
+        SELECT seq_post.NEXTVAL FROM dual
+    </selectKey>
+
+    INSERT INTO Post (
+        id, title, description, total_amount, total_quantity, my_quantity,
+        price_per_item, participant_limit, product_url, image_url,
+        status, category_id, writer_id
+    ) VALUES (
+        #{id}, #{title}, #{description}, #{totalAmount}, #{totalQuantity}, #{myQuantity},
+        #{pricePerItem}, #{participantLimit}, #{productUrl}, #{imageUrl},
+        #{status, jdbcType=VARCHAR}, #{categoryId}, #{writerId}
+    )
+</insert>
+
 
     <resultMap id="postResultMap" type="com.ddwu.notalonemarket.domain.Post">
 	    <id property="id" column="id"/>
