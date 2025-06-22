@@ -2,6 +2,8 @@ package com.ddwu.notalonemarket.mapper;
 
 import com.ddwu.notalonemarket.domain.Post;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
+
 import java.util.List;
 
 @Mapper
@@ -13,4 +15,6 @@ public interface PostMapper {
     List<Post> selectPostsByKeyword(String keyword);
     List<Post> selectPostsByCategory(String category);
     List<Post> selectPostsByWriterId(Long writerId);
+    List<Post> searchByKeywordAndCategory(@Param("keyword") String keyword, @Param("category") String category);
+    
 }
