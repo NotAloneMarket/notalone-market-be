@@ -58,12 +58,14 @@
 
 
     <select id="selectPostsByCategory" parameterType="string" resultMap="postResultMap">
-        SELECT * FROM Post
-        WHERE category_id IN (
-            SELECT id FROM Category WHERE LOWER(name) = LOWER(#{category})
-        )
-        AND status = 'SELLING'
-    </select>
+	  SELECT p.*
+	  FROM Post p
+	  JOIN Category c ON p.category_id = c.id
+	  WHERE c.name = #{category}
+	    AND p.status = 'SELLING'
+	</select>
+
+
 
     <select id="selectPostsByWriterId" parameterType="long" resultMap="postResultMap">
         SELECT * FROM Post
