@@ -103,28 +103,35 @@ public class ChatRoomController {
 	}
 
 
-	@PostMapping("/{roomId}/join")
-	public ResponseEntity<?> joinRoom(@PathVariable Long roomId, @RequestHeader("Authorization") String authHeader) {
-		if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token");
-		}
+	@PostMapping("/post/{postId}/join")
+	public ResponseEntity<?> joinRoomByPost(@PathVariable Long postId, @RequestHeader("Authorization") String authHeader) {
+	    if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+	        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token");
+	    }
 
-		String token = authHeader.substring(7);
-		String loginId = jwtUtil.extractLoginId(token);
+	    String token = authHeader.substring(7);
+	    String loginId = jwtUtil.extractLoginId(token);
 
-		User user = userService.findByLoginId(loginId);
-		if (user == null) {
-			return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
-		}
+	    User user = userService.findByLoginId(loginId);
+	    if (user == null) {
+	        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
+	    }
 
-		Long userId = user.getUserId();
+	    Long userId = user.getUserId();
 
-		if (!participantService.isUserInRoom(userId, roomId)) {
-			participantService.join(roomId, userId, false);
-		}
+	    // postId로부터 roomId 조회
+	    Long roomId = chatRoomService.findRoomIdByPostId(postId);
+	    if (roomId == null) {
+	        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Chat room not found for the given post");
+	    }
 
-		return ResponseEntity.ok(Map.of("message", "joined"));
+	    if (!participantService.isUserInRoom(userId, roomId)) {
+	        participantService.join(roomId, userId, false);
+	    }
+
+	    return ResponseEntity.ok(Map.of("message", "joined", "roomId", roomId));
 	}
+
 
 	// 특정 채팅방의 메시지 반환
 	@GetMapping("/{roomId}/messages")
