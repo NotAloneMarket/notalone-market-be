@@ -5,6 +5,9 @@ import com.ddwu.notalonemarket.domain.Post;
 import com.ddwu.notalonemarket.dto.PostDTO;
 import com.ddwu.notalonemarket.mapper.PostMapper;
 import com.ddwu.notalonemarket.repository.CategoryRepository;
+import com.ddwu.notalonemarket.repository.UserRepository;
+import com.ddwu.notalonemarket.domain.User;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -19,6 +22,9 @@ public class PostServiceMyBatis {
 
     @Autowired
     private CategoryRepository categoryRepository;
+    
+    @Autowired
+    private UserRepository userRepository;
 
     // 게시글 등록
     public Long createPost(Post post) {
@@ -35,7 +41,17 @@ public class PostServiceMyBatis {
                 .map(Category::getName)
                 .orElse("기타");
 
-        return post.toDTO(categoryName);
+        PostDTO dto = post.toDTO(categoryName);
+        
+        if (post.getWriterId() != null) {
+            dto.setNickname(
+                userRepository.findById(post.getWriterId())
+                    .map(User::getNickname)
+                    .orElse(null)
+            );
+        }
+
+        return dto;
     }
 
     // SELLING 상태인 전체 게시글 조회
@@ -48,7 +64,15 @@ public class PostServiceMyBatis {
                     String categoryName = categoryRepository.findById(post.getCategoryId())
                             .map(Category::getName)
                             .orElse("기타");
-                    return post.toDTO(categoryName);
+                    PostDTO dto = post.toDTO(categoryName);
+
+                    dto.setNickname(
+                        userRepository.findById(post.getWriterId())
+                            .map(User::getNickname)
+                            .orElse(null)
+                    );
+
+                    return dto;
                 })
                 .collect(Collectors.toList());
     }
