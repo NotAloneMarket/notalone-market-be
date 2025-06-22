@@ -56,17 +56,7 @@
 		id = #{id}
 	</select>
 
-	<select id="selectPostsByKeyword" parameterType="string"
-		resultMap="postResultMap">
-		SELECT * FROM Post
-		WHERE status = 'SELLING'
-		AND (
-		LOWER(title)
-		LIKE '%' || LOWER(#{keyword}) || '%'
-		OR LOWER(description) LIKE '%' ||
-		LOWER(#{keyword}) || '%'
-		)
-	</select>
+
 
 	<select id="selectPostsByCategory" parameterType="string"
 		resultMap="postResultMap">
@@ -83,14 +73,39 @@
 		WHERE writer_id = #{writerId}
 	</select>
 
-	<select id="searchByKeywordAndCategory"
-		resultType="com.ddwu.notalonemarket.domain.Post">
-		SELECT * FROM post
-		WHERE (
-		LOWER(title) LIKE '%' || LOWER(#{keyword}) || '%'
-		OR LOWER(description) LIKE '%' || LOWER(#{keyword}) || '%'
+	<select id="selectPostsByKeyword" parameterType="string"
+		resultMap="postResultMap">
+		SELECT * FROM Post
+		WHERE status = 'SELLING'
+		AND (
+		LOWER(title)
+		LIKE '%' || LOWER(#{keyword}) || '%'
+		OR LOWER(description) LIKE '%' ||
+		LOWER(#{keyword}) || '%'
 		)
-		AND category_id = (SELECT id FROM category WHERE name = #{category})
-		AND status = 'selling'
 	</select>
+
+	<select id="selectPostsByCategoryId" parameterType="long"
+		resultMap="postResultMap">
+		SELECT * FROM Post
+		WHERE category_id = #{categoryId}
+		AND
+		status = 'SELLING'
+	</select>
+
+	<select id="searchByKeywordAndCategory" parameterType="map"
+		resultMap="postResultMap">
+		SELECT * FROM Post
+		WHERE status = 'SELLING'
+		<if test="categoryId != null">
+			AND category_id = #{categoryId}
+		</if>
+		<if test="keyword != null and keyword != ''">
+			AND (
+			LOWER(title) LIKE '%' || LOWER(#{keyword}) || '%'
+			OR LOWER(description) LIKE '%' || LOWER(#{keyword}) || '%'
+			)
+		</if>
+	</select>
+
 </mapper>

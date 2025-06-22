@@ -5,6 +5,7 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
+import java.util.Map;
 
 @Mapper
 public interface PostMapper {
@@ -14,7 +15,7 @@ public interface PostMapper {
 
     List<Post> selectPostsByKeyword(String keyword);
     List<Post> selectPostsByCategory(String category);
-    List<Post> selectPostsByWriterId(Long writerId);
-    List<Post> searchByKeywordAndCategory(@Param("keyword") String keyword, @Param("category") String category);
-    
+    List<Post> selectPostsByWriterId(Long writerId);    
+    List<Post> selectPostsByCategoryId(Long categoryId);
+    List<Post> searchByKeywordAndCategory(Map<String, Object> param);
 }

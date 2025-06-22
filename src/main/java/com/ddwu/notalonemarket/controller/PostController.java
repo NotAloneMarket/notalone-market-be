@@ -96,22 +96,18 @@ public class PostController {
 
 	@GetMapping("")
 	public List<PostDTO> searchAndFilterPosts(@RequestParam(required = false) String keyword,
-			@RequestParam(required = false) String category) {
-		List<PostDTO> result;
-
-		if (keyword != null && category != null && !category.equals("전체")) {
-			result = postServiceMyBatis.searchByKeywordAndCategory(keyword, category);
-		} else if (keyword != null) {
-			result = postServiceMyBatis.searchPostsByKeyword(keyword);
-		} else if (category != null && !category.equals("전체")) {
-			result = postServiceMyBatis.filterPostsByCategory(category).stream()
-					.filter(dto -> "selling".equalsIgnoreCase(dto.getStatus())).collect(Collectors.toList());
-		} else {
-			result = postServiceMyBatis.getAllSellingPosts();
-		}
-
-		return result;
+	                                          @RequestParam(required = false) Long categoryId) {
+	    if (keyword != null && categoryId != null) {
+	        return postServiceMyBatis.searchByKeywordAndCategoryId(keyword, categoryId);
+	    } else if (keyword != null) {
+	        return postServiceMyBatis.searchPostsByKeyword(keyword);
+	    } else if (categoryId != null) {
+	        return postServiceMyBatis.filterPostsByCategoryId(categoryId);
+	    } else {
+	        return postServiceMyBatis.getAllSellingPosts();
+	    }
 	}
+
 
 	// ✅ 단일 게시글 상세 조회
 	@GetMapping("/{id}")
