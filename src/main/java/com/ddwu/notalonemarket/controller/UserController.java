@@ -1,6 +1,7 @@
 package com.ddwu.notalonemarket.controller;
 
 import com.ddwu.notalonemarket.domain.User;
+import com.ddwu.notalonemarket.dto.UserProfileUpdateDTO;
 import com.ddwu.notalonemarket.dto.UserRegisterDTO;
 import com.ddwu.notalonemarket.service.UserService;
 import com.ddwu.notalonemarket.util.JwtUtil;
@@ -58,44 +59,26 @@ public class UserController {
 	// 프로필 정보 수정 (닉네임/폰번호 + 프로필 이미지)
 	@PutMapping("/profile")
 	public ResponseEntity<?> updateProfile(
-	        @RequestHeader("Authorization") String authHeader,
-	        @RequestParam(required = false) String nickname,
-	        @RequestParam(required = false) String phoneNum,
-	        @RequestParam(required = false) MultipartFile profileImage
+	    @RequestHeader("Authorization") String authHeader,
+	    @RequestBody UserProfileUpdateDTO dto
 	) {
-	    try {
-	        if (!authHeader.startsWith("Bearer ")) {
-	            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token");
-	        }
-
-	        String token = authHeader.substring(7);
-	        String loginId = jwtUtil.extractLoginId(token);
-	        User user = userService.findByLoginId(loginId);
-
-	        if (user == null) {
-	            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
-	        }
-
-	        String imageUrl = null;
-	        if (profileImage != null && !profileImage.isEmpty()) {
-	            String fileName = UUID.randomUUID() + "_" + profileImage.getOriginalFilename();
-	            String uploadDir = System.getProperty("user.home") + "/notalonemarket/uploads/";
-	            File dest = new File(uploadDir + fileName);
-	            dest.getParentFile().mkdirs();
-	            profileImage.transferTo(dest);
-	            imageUrl = "/uploads/" + fileName;
-	        }
-
-	        userService.updateProfile(user.getUserId(), nickname, phoneNum, imageUrl);
-
-	        return ResponseEntity.ok(Map.of("message", "Profile updated successfully"));
-
-	    } catch (IOException e) {
-	        e.printStackTrace();
-	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-	                .body(Map.of("error", "프로필 수정 실패", "message", e.getMessage()));
+	    if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+	        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token");
 	    }
+
+	    String token = authHeader.substring(7);
+	    String loginId = jwtUtil.extractLoginId(token);
+
+	    User user = userService.findByLoginId(loginId);
+	    if (user == null) {
+	        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
+	    }
+
+	    userService.updateProfile(user.getUserId(), dto.getNickname(), dto.getPhoneNum(), dto.getProfileImageUrl());
+
+	    return ResponseEntity.ok(Map.of("message", "프로필 수정 완료"));
 	}
+
 
 
 
