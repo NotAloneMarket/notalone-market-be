@@ -19,57 +19,65 @@ import java.util.List;
 @Configuration
 public class SecurityConfig {
 
-	private final JwtFilter jwtFilter;
+    private final JwtFilter jwtFilter;
 
-	public SecurityConfig(JwtFilter jwtFilter) {
-		this.jwtFilter = jwtFilter;
-	}
+    public SecurityConfig(JwtFilter jwtFilter) {
+        this.jwtFilter = jwtFilter;
+    }
 
-	@Bean
-	public PasswordEncoder passwordEncoder() {
-		return new BCryptPasswordEncoder();
-	}
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
 
-	@Bean
-	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-		http.cors(Customizer.withDefaults()).csrf(csrf -> csrf.disable()).formLogin(form -> form.disable())
-				.logout(logout -> logout.disable()).httpBasic(httpBasic -> httpBasic.disable())
-				.headers(headers -> headers.frameOptions(frame -> frame.disable()))
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        http.cors(Customizer.withDefaults())
+            .csrf(csrf -> csrf.disable())
+            .formLogin(form -> form.disable())
+            .logout(logout -> logout.disable())
+            .httpBasic(httpBasic -> httpBasic.disable())
+            .headers(headers -> headers.frameOptions(frame -> frame.disable()))
 
-				.authorizeHttpRequests(auth -> auth.requestMatchers("/thymeleaf-login").permitAll()
-						.requestMatchers(HttpMethod.POST, "/user/login").permitAll()
-						.requestMatchers(HttpMethod.POST, "/user/register").permitAll().requestMatchers("/uploads/**")
-						.permitAll()
+            .authorizeHttpRequests(auth -> auth
+                // 공개 접근 허용
+                .requestMatchers("/thymeleaf-login", "/onboarding").permitAll()
+                .requestMatchers("/assets/**", "/uploads/**").permitAll()
+                .requestMatchers(HttpMethod.POST, "/user/login").permitAll()
+                .requestMatchers(HttpMethod.POST, "/user/register").permitAll()
 
-						// 게시글 관련
-						.requestMatchers(HttpMethod.POST, "/posts/write").authenticated() // 🔑 추가
-						.requestMatchers(HttpMethod.GET, "/posts/**").permitAll() // 조회는 허용
-						.requestMatchers(HttpMethod.GET, "/posts").permitAll()
+                // 게시글 조회는 허용
+                .requestMatchers(HttpMethod.GET, "/posts/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/posts").permitAll()
 
-						// 인증 필요한 요청
-						.requestMatchers("/chatrooms", "/chatrooms/**", "/user/profile", "/user/password", "/user/me",
-								"/posts/my", "/chatrooms/*/messages", "/buyHistory")
-						.authenticated()
+                // 인증 필요한 요청
+                .requestMatchers(HttpMethod.POST, "/posts/write").authenticated()
+                .requestMatchers(
+                    "/chatrooms", "/chatrooms/**",
+                    "/user/profile", "/user/password", "/user/me",
+                    "/posts/my", "/chatrooms/*/messages", "/buyHistory"
+                ).authenticated()
 
-						// 기타 공개 요청
-						.requestMatchers("/onboarding", "/assets/**").permitAll().anyRequest().authenticated())
+                // 그 외 요청은 인증 필요
+                .anyRequest().authenticated()
+            )
 
-				.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
+            .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
-		return http.build();
-	}
+        return http.build();
+    }
 
-	@Bean
-	public CorsConfigurationSource corsConfigurationSource() {
-		CorsConfiguration config = new CorsConfiguration();
-		config.setAllowCredentials(true);
-		config.setAllowedOrigins(List.of("http://localhost:5173"));
-		config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-		config.setAllowedHeaders(List.of("*"));
-		config.setExposedHeaders(List.of("Authorization"));
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration config = new CorsConfiguration();
+        config.setAllowCredentials(true);
+        config.setAllowedOrigins(List.of("http://localhost:5173"));
+        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        config.setAllowedHeaders(List.of("*"));
+        config.setExposedHeaders(List.of("Authorization"));
 
-		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-		source.registerCorsConfiguration("/**", config);
-		return source;
-	}
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", config);
+        return source;
+    }
 }
