@@ -59,10 +59,15 @@ public class JwtFilter extends OncePerRequestFilter {
                 System.out.println("✅ SecurityContextHolder에 인증 정보 설정 완료");
             } else {
                 System.out.println("⚠️ 이미 인증된 사용자이거나 loginId가 null입니다.");
+                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "유효하지 않은 토큰입니다.");
+                return; // 🔥 인증 실패 시 여기서 요청 종료
             }
         } else {
             System.out.println("⚠️ Authorization 헤더 없음 또는 형식 오류");
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "인증 정보가 없습니다.");
+            return; // 🔥 인증 실패 시 여기서 요청 종료
         }
+
 
         filterChain.doFilter(request, response);
     }

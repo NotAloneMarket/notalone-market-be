@@ -12,18 +12,18 @@ import java.util.Map;
 @Service
 public class ImageUploadService {
 
-    private final Cloudinary cloudinary;
+	private final Cloudinary cloudinary;
 
-    public ImageUploadService(Cloudinary cloudinary) {
-        this.cloudinary = cloudinary;
-    }
+	public ImageUploadService(Cloudinary cloudinary) {
+		this.cloudinary = cloudinary;
+	}
 
-    public String uploadImage(MultipartFile file) throws IOException {
-        File tempFile = File.createTempFile("upload-", file.getOriginalFilename());
-        file.transferTo(tempFile);
+	public String uploadImage(MultipartFile file) throws IOException {
+		File tempFile = File.createTempFile("upload-", file.getOriginalFilename());
+		file.transferTo(tempFile);
 
-        Map uploadResult = cloudinary.uploader().upload(tempFile, ObjectUtils.emptyMap());
+		Map uploadResult = cloudinary.uploader().upload(tempFile, ObjectUtils.emptyMap());
 
-        return (String) uploadResult.get("secure_url");  // ✅ 클라우드 URL 반환
-    }
+		return (String) uploadResult.get("secure_url"); // ✅ 클라우드 URL 반환
+	}
 }

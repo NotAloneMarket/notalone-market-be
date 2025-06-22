@@ -39,34 +39,31 @@ public class SecurityConfig {
             .logout(logout -> logout.disable())
             .httpBasic(httpBasic -> httpBasic.disable())
             .headers(headers -> headers.frameOptions(frame -> frame.disable()))
+            
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/thymeleaf-login").permitAll()
-                .requestMatchers(HttpMethod.POST, "/user/login").permitAll()
-                .requestMatchers(HttpMethod.POST, "/user/register").permitAll()
-                .requestMatchers("/uploads/**").permitAll()
+            	    .requestMatchers("/thymeleaf-login").permitAll()
+            	    .requestMatchers(HttpMethod.POST, "/user/login").permitAll()
+            	    .requestMatchers(HttpMethod.POST, "/user/register").permitAll()
+            	    .requestMatchers("/uploads/**").permitAll()
 
-                // 인증 필요한 요청
-                .requestMatchers(
-                	    "/chatrooms", "/chatrooms/**",
-                	    "/user/profile", "/user/password",
-                	    "/user/me",
-                	    "/posts/my", "/chatrooms/*/messages",
-                	    "/buyHistory"
-                ).authenticated()
+            	    // 게시글 관련
+            	    .requestMatchers(HttpMethod.POST, "/posts/write").authenticated() // 🔑 추가
+            	    .requestMatchers(HttpMethod.GET, "/posts/**").permitAll()         // 조회는 허용
+            	    .requestMatchers(HttpMethod.GET, "/posts").permitAll()
 
+            	    // 인증 필요한 요청
+            	    .requestMatchers(
+            	        "/chatrooms", "/chatrooms/**",
+            	        "/user/profile", "/user/password", "/user/me",
+            	        "/posts/my", "/chatrooms/*/messages",
+            	        "/buyHistory"
+            	    ).authenticated()
 
-                // 그 외 공개
-                .requestMatchers(
-                    "/posts", "/posts/**",
-                    "/ws/**", "/app/**", "/topic/**"
-                ).permitAll()
-                
-                .requestMatchers("/onboarding", "/assets/**").permitAll()
-                .requestMatchers("/uploads/**").permitAll()
+            	    // 기타 공개 요청
+            	    .requestMatchers("/onboarding", "/assets/**").permitAll()
+            	    .anyRequest().authenticated()
+            	)
 
-
-                .anyRequest().authenticated()
-            )
             .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
