@@ -29,8 +29,8 @@ public class LoginController {
 
     @GetMapping("/thymeleaf-login")
     public String loginPage() {
-        System.out.println("✅ /thymeleaf-login 컨트롤러 진입");
-        return "login"; // templates/login.html
+        System.out.println("/thymeleaf-login 컨트롤러 진입");
+        return "login";
     }
 
     @PostMapping("/user/login")

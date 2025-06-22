@@ -18,7 +18,7 @@ public class PostDTO {
     private String nickname;
 
 
-    // 생성자 (Post 엔티티 → DTO 변환 시 사용)
+    // 생성자
     public PostDTO(Long id, String title, String description, Integer totalAmount, Integer totalQuantity,
                    Integer myQuantity, Integer pricePerItem, Integer participantLimit,
                    String productUrl, String imageUrl, String status, String categoryName, Long writerId) {

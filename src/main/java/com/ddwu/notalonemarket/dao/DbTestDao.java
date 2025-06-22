@@ -22,10 +22,10 @@ public class DbTestDao {
              ResultSet rs = stmt.executeQuery("SELECT sysdate FROM dual")) {
 
             if (rs.next()) {
-                System.out.println("✅ DB 연결 성공! 현재 시간: " + rs.getString(1));
+                System.out.println("DB 연결 성공! 현재 시간: " + rs.getString(1));
             }
         } catch (Exception e) {
-            System.out.println("❌ DB 연결 실패: " + e.getMessage());
+            System.out.println("DB 연결 실패: " + e.getMessage());
         }
     }
 }

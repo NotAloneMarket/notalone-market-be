@@ -53,7 +53,6 @@ public class SecurityConfig {
                        "/posts/my", "/chatrooms/*/messages", "/buyHistory"
                    ).authenticated()
 
-                   // ✅ WebSocket 연결 관련 경로 허용
                    .requestMatchers("/ws/**", "/sockjs/**", "/websocket/**", "/info/**").permitAll()
 
                    // 게시글 관련

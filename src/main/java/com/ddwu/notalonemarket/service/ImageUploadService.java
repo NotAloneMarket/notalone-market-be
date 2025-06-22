@@ -24,6 +24,6 @@ public class ImageUploadService {
 
 		Map uploadResult = cloudinary.uploader().upload(tempFile, ObjectUtils.emptyMap());
 
-		return (String) uploadResult.get("secure_url"); // ✅ 클라우드 URL 반환
+		return (String) uploadResult.get("secure_url"); // 클라우드 URL 반환
 	}
 }

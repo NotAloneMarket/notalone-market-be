@@ -7,5 +7,5 @@ import java.util.List;
 public interface BuyHistoryRepository extends JpaRepository<BuyHistory, Long> {
     List<BuyHistory> findByPostId(Long postId);
     boolean existsByUserIdAndPostId(Long userId, Long postId);
-    List<BuyHistory> findByUserId(Long userId); // 추가
+    List<BuyHistory> findByUserId(Long userId);
 }

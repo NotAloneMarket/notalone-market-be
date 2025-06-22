@@ -46,7 +46,7 @@ public class PostService {
             String categoryName = getCategoryName(post.getCategoryId());
             PostDTO dto = post.toDTO(categoryName);
 
-            // 👇 작성자 닉네임을 직접 세팅
+            // 작성자 닉네임을 직접 세팅
             User user = post.getUser(); // Post 엔티티에 getUser()가 있다면
             if (user != null) {
                 dto.setNickname(user.getNickname());
@@ -80,7 +80,7 @@ public class PostService {
     }
     
     public List<PostDTO> searchPostsByKeyword(String keyword) {
-        System.out.println("🔍 검색 키워드: " + keyword);
+        System.out.println("검색 키워드: " + keyword);
 
         return postRepository
                 .findByTitleContainingIgnoreCaseOrDescriptionContainingIgnoreCase(keyword, keyword)
