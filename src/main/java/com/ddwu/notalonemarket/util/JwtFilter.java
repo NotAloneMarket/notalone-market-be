@@ -32,8 +32,8 @@ public class JwtFilter extends OncePerRequestFilter {
 	    String path = request.getRequestURI();
 	    String upgrade = request.getHeader("Upgrade");
 	    String authHeader = request.getHeader("Authorization");
-	    
-	    // ✅ WebSocket 요청 우회
+
+	    // ✅ WebSocket 요청은 필터 통과
 	    if (
 	        (upgrade != null && upgrade.equalsIgnoreCase("websocket")) ||
 	        path.startsWith("/ws") ||
@@ -45,17 +45,13 @@ public class JwtFilter extends OncePerRequestFilter {
 	        filterChain.doFilter(request, response);
 	        return;
 	    }
-	    
-	    System.out.println("👉 요청 경로: " + path);
-        System.out.println("👉 Authorization 헤더: " + authHeader);
 
-	    // ✅ 인증 없이 허용할 API
+	    // ✅ JWT 인증 없이 허용할 경로는 바로 통과
 	    if (
-	    	path.equals("/thymeleaf-login") ||
+	        path.equals("/thymeleaf-login") ||
 	        path.equals("/user/login") ||
 	        path.equals("/user/register") ||
 	        path.startsWith("/posts") ||
-	        path.startsWith("/posts/") ||
 	        path.startsWith("/uploads") ||
 	        path.startsWith("/assets") ||
 	        path.equals("/onboarding")
@@ -64,30 +60,27 @@ public class JwtFilter extends OncePerRequestFilter {
 	        return;
 	    }
 
-	    // ✅ JWT 인증 로직
+	    // ✅ JWT 인증 처리
 	    if (authHeader != null && authHeader.startsWith("Bearer ")) {
 	        String token = authHeader.substring(7);
 	        String loginId = jwtUtil.validateTokenAndGetLoginId(token);
 
 	        if (loginId != null && SecurityContextHolder.getContext().getAuthentication() == null) {
 	            UsernamePasswordAuthenticationToken authentication =
-	                new UsernamePasswordAuthenticationToken(loginId, null,
-	                    List.of(new SimpleGrantedAuthority("ROLE_USER")));
+	                    new UsernamePasswordAuthenticationToken(
+	                            loginId, null, List.of(new SimpleGrantedAuthority("ROLE_USER")));
 	            authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 	            SecurityContextHolder.getContext().setAuthentication(authentication);
-	            
+
+	            filterChain.doFilter(request, response);
 	        } else {
-	        	System.out.println("⚠️ Authorization 헤더 없음 또는 형식 오류");
 	            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "유효하지 않은 토큰입니다.");
-	            return;
 	        }
 	    } else {
 	        response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "인증 정보가 없습니다.");
-	        return;
 	    }
-
-	    filterChain.doFilter(request, response);
 	}
+
 
 
 }
