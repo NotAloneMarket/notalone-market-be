@@ -31,7 +31,8 @@ public class JwtFilter extends OncePerRequestFilter {
 
 	    String path = request.getRequestURI();
 	    String upgrade = request.getHeader("Upgrade");
-
+	    String authHeader = request.getHeader("Authorization");
+	    
 	    // ✅ WebSocket 요청 우회
 	    if (
 	        (upgrade != null && upgrade.equalsIgnoreCase("websocket")) ||
@@ -44,20 +45,26 @@ public class JwtFilter extends OncePerRequestFilter {
 	        filterChain.doFilter(request, response);
 	        return;
 	    }
+	    
+	    System.out.println("👉 요청 경로: " + path);
+        System.out.println("👉 Authorization 헤더: " + authHeader);
 
 	    // ✅ 인증 없이 허용할 API
 	    if (
+	    	path.equals("/thymeleaf-login") ||
 	        path.equals("/user/login") ||
 	        path.equals("/user/register") ||
 	        path.startsWith("/posts") ||
-	        path.startsWith("/uploads")
+	        path.startsWith("/posts/") ||
+	        path.startsWith("/uploads") ||
+	        path.startsWith("/assets") ||
+	        path.equals("/onboarding")
 	    ) {
 	        filterChain.doFilter(request, response);
 	        return;
 	    }
 
 	    // ✅ JWT 인증 로직
-	    String authHeader = request.getHeader("Authorization");
 	    if (authHeader != null && authHeader.startsWith("Bearer ")) {
 	        String token = authHeader.substring(7);
 	        String loginId = jwtUtil.validateTokenAndGetLoginId(token);
@@ -68,7 +75,9 @@ public class JwtFilter extends OncePerRequestFilter {
 	                    List.of(new SimpleGrantedAuthority("ROLE_USER")));
 	            authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 	            SecurityContextHolder.getContext().setAuthentication(authentication);
+	            
 	        } else {
+	        	System.out.println("⚠️ Authorization 헤더 없음 또는 형식 오류");
 	            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "유효하지 않은 토큰입니다.");
 	            return;
 	        }

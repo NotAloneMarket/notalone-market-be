@@ -38,9 +38,20 @@ public class SecurityConfig {
 
             .authorizeHttpRequests(auth -> auth
                    .requestMatchers("/thymeleaf-login").permitAll()
+                   .requestMatchers("/assets/**", "/uploads/**").permitAll()
+                   .requestMatchers(HttpMethod.POST, "/user/login").permitAll()
+                   .requestMatchers(HttpMethod.POST, "/user/register").permitAll()
                    .requestMatchers(HttpMethod.POST, "/user/login").permitAll()
                    .requestMatchers(HttpMethod.POST, "/user/register").permitAll()
                    .requestMatchers("/uploads/**").permitAll()
+                   .requestMatchers(HttpMethod.GET, "/posts/**").permitAll()
+                   .requestMatchers(HttpMethod.GET, "/posts").permitAll()
+                   .requestMatchers(HttpMethod.POST, "/posts/write").authenticated()
+                   .requestMatchers(
+                       "/chatrooms", "/chatrooms/**",
+                       "/user/profile", "/user/password", "/user/me",
+                       "/posts/my", "/chatrooms/*/messages", "/buyHistory"
+                   ).authenticated()
 
                    // ✅ WebSocket 연결 관련 경로 허용
                    .requestMatchers("/ws/**", "/sockjs/**", "/websocket/**", "/info/**").permitAll()
