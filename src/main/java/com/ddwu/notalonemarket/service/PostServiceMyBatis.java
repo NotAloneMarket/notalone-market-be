@@ -53,6 +53,13 @@ public class PostServiceMyBatis {
 
         return dto;
     }
+    
+    public List<PostDTO> searchByKeywordAndCategory(String keyword, String category) {
+        List<Post> posts = postMapper.searchByKeywordAndCategory(keyword, category);
+        return toPostDTOList(posts);
+    }
+
+
 
     // SELLING 상태인 전체 게시글 조회
     public List<PostDTO> getAllSellingPosts() {
