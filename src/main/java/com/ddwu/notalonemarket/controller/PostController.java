@@ -113,40 +113,34 @@ public class PostController {
 		return "success";
 	}
 
+	// 내가 쓴 게시글 조회
 	@GetMapping("/my")
 	public ResponseEntity<?> getMyPosts(@RequestHeader("Authorization") String authHeader) {
-		System.out.println("✅ getMyPosts() 진입");
-
 		if (authHeader == null || !authHeader.startsWith("Bearer ")) {
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token");
 		}
 
 		String token = authHeader.substring(7);
 		String loginId = jwtUtil.extractLoginId(token);
-		System.out.println("👉 loginId: " + loginId); // 나중에 지우기
-
 		User user = userService.findByLoginId(loginId);
 		if (user == null) {
 			return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
 		}
 
-		System.out.println("👉 userId: " + user.getUserId()); // 나중에 지우기
-
-		List<PostDTO> myPosts = postService.getMyPosts(user.getUserId());
+		List<PostDTO> myPosts = postServiceMyBatis.getMyPosts(user.getUserId());
 		return ResponseEntity.ok(myPosts);
 	}
 
-	// 키워드로 검색
+	// 키워드 검색
 	@GetMapping(params = "keyword")
 	public List<PostDTO> searchPostsByKeyword(@RequestParam String keyword) {
-		return postService.searchPostsByKeyword(keyword);
+		return postServiceMyBatis.searchPostsByKeyword(keyword);
 	}
 
-	// 카테고리로 필터링
+	// 카테고리 필터링
 	@GetMapping(params = "category")
 	public List<PostDTO> filterPostsByCategory(@RequestParam String category) {
-		return postService.filterPostsByCategory(category).stream()
-				.filter(dto -> "selling".equalsIgnoreCase(dto.getStatus())).collect(Collectors.toList());
+		return postServiceMyBatis.filterPostsByCategory(category);
 	}
 
 	// 채팅방 id로 postDTO 찾기
@@ -160,5 +154,6 @@ public class PostController {
 			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", e.getMessage()));
 		}
 	}
+
 
 }

@@ -76,4 +76,38 @@ public class PostServiceMyBatis {
                 })
                 .collect(Collectors.toList());
     }
+    
+    public List<PostDTO> searchPostsByKeyword(String keyword) {
+        List<Post> posts = postMapper.selectPostsByKeyword(keyword);
+        return toPostDTOList(posts);
+    }
+
+    public List<PostDTO> filterPostsByCategory(String category) {
+        List<Post> posts = postMapper.selectPostsByCategory(category);
+        return toPostDTOList(posts);
+    }
+
+    public List<PostDTO> getMyPosts(Long writerId) {
+        List<Post> posts = postMapper.selectPostsByWriterId(writerId);
+        return toPostDTOList(posts);
+    }
+
+    // 공통 로직 추출
+    private List<PostDTO> toPostDTOList(List<Post> posts) {
+        return posts.stream()
+            .map(post -> {
+                String categoryName = categoryRepository.findById(post.getCategoryId())
+                    .map(Category::getName)
+                    .orElse("기타");
+
+                PostDTO dto = post.toDTO(categoryName);
+                dto.setNickname(
+                    userRepository.findById(post.getWriterId())
+                        .map(User::getNickname)
+                        .orElse(null)
+                );
+                return dto;
+            }).collect(Collectors.toList());
+    }
+
 }

@@ -6,7 +6,11 @@ import java.util.List;
 
 @Mapper
 public interface PostMapper {
-    void insertPost(Post post);
+	void insertPost(Post post);
     Post selectPostById(Long id);
     List<Post> selectAllSellingPosts();
+
+    List<Post> selectPostsByKeyword(String keyword);
+    List<Post> selectPostsByCategory(String category);
+    List<Post> selectPostsByWriterId(Long writerId);
 }
