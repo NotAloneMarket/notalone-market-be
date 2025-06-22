@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8" />
+  <title>온보딩</title>
+  <style>
+    body {
+      background-color: #f8f8f8;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin: 0;
+    }
+
+    .container {
+      width: 390px;
+      text-align: center;
+    }
+
+    .logo {
+      width: 100px;
+      height: 100px;
+      margin-bottom: 1.5rem;
+    }
+
+    .title {
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: #2563eb;
+    }
+
+    .subtitle {
+      font-size: 0.875rem;
+      color: #6b7280;
+      margin-top: 0.5rem;
+    }
+  </style>
+
+  <script>
+    // 3초 뒤 타임리프 로그인 페이지로 이동
+    setTimeout(() => {
+      window.location.href = "http://localhost:8080/thymeleaf-login";
+    }, 3000);
+  </script>
+</head>
+<body>
+  <div class="container">
+    <img class="logo" src="/assets/notalone_logo.png" alt="로고" />
+    <h1 class="title">나혼자 안산다</h1>
+    <p class="subtitle">1인 가구를 위한 공동구매 플랫폼</p>
+  </div>
+</body>
+</html>

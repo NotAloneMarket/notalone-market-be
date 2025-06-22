@@ -3,7 +3,9 @@ package com.ddwu.notalonemarket.controller;
 import com.ddwu.notalonemarket.domain.Post;
 import com.ddwu.notalonemarket.domain.User;
 import com.ddwu.notalonemarket.dto.PostDTO;
-import com.ddwu.notalonemarket.mapper.PostMapper;
+import com.ddwu.notalonemarket.dto.PostWriteDTO;
+// import com.ddwu.notalonemarket.mapper.PostMapper;
+
 import com.ddwu.notalonemarket.repository.UserRepository;
 import com.ddwu.notalonemarket.service.ChatRoomService;
 import com.ddwu.notalonemarket.service.PostService;
@@ -19,12 +21,13 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.*;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 import com.ddwu.notalonemarket.util.JwtUtil;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.*;
 
 @CrossOrigin(origins = "http://localhost:5173")
 @RestController
@@ -52,53 +55,43 @@ public class PostController {
 
  // 게시글 작성 (이미지 포함)
     @PostMapping("/write")
-    public ResponseEntity<?> createPost(
-            @RequestParam("title") String title,
-            @RequestParam("description") String description,
-            @RequestParam("totalAmount") Integer totalAmount,
-            @RequestParam("totalQuantity") Integer totalQuantity,
-            @RequestParam("myQuantity") Integer myQuantity,
-            @RequestParam("pricePerItem") Integer pricePerItem,
-            @RequestParam("participantLimit") Integer participantLimit,
-            @RequestParam("productUrl") String productUrl,
-            @RequestParam("categoryId") Long categoryId,
-            @RequestParam(value = "image", required = false) MultipartFile image,
-            HttpServletRequest request
+    public ResponseEntity<?> createPost( @Valid @ModelAttribute PostWriteDTO dto, BindingResult bindingResult,HttpServletRequest request
     ) throws IOException {
+        if (bindingResult.hasErrors()) {
+            return ResponseEntity.badRequest().body(bindingResult.getAllErrors());
+        }
 
-        // JWT → loginId 추출
         String authHeader = request.getHeader("Authorization");
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             throw new RuntimeException("Authorization header is missing or invalid");
         }
         String token = authHeader.substring(7);
         String loginId = jwtUtil.extractLoginId(token);
-
         User user = userRepository.findByLoginId(loginId)
                 .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
 
-        // 이미지 저장 처리
+        // 이미지 저장
         String imageUrl = null;
-        if (image != null && !image.isEmpty()) {
-            String fileName = UUID.randomUUID() + "_" + image.getOriginalFilename();
+        if (dto.getImage() != null && !dto.getImage().isEmpty()) {
+            String fileName = UUID.randomUUID() + "_" + dto.getImage().getOriginalFilename();
             String uploadDir = System.getProperty("user.home") + "/notalonemarket/uploads/";
             File dest = new File(uploadDir + fileName);
             dest.getParentFile().mkdirs();
-            image.transferTo(dest);
+            dto.getImage().transferTo(dest);
             imageUrl = "/uploads/" + fileName;
         }
 
         // Post 객체 생성
         Post post = new Post();
-        post.setTitle(title);
-        post.setDescription(description);
-        post.setTotalAmount(totalAmount);
-        post.setTotalQuantity(totalQuantity);
-        post.setMyQuantity(myQuantity);
-        post.setPricePerItem(pricePerItem);
-        post.setParticipantLimit(participantLimit);
-        post.setProductUrl(productUrl);
-        post.setCategoryId(categoryId);
+        post.setTitle(dto.getTitle());
+        post.setDescription(dto.getDescription());
+        post.setTotalAmount(dto.getTotalAmount());
+        post.setTotalQuantity(dto.getTotalQuantity());
+        post.setMyQuantity(dto.getMyQuantity());
+        post.setPricePerItem(dto.getPricePerItem());
+        post.setParticipantLimit(dto.getParticipantLimit());
+        post.setProductUrl(dto.getProductUrl());
+        post.setCategoryId(dto.getCategoryId());
         post.setImageUrl(imageUrl);
         post.setWriterId(user.getUserId());
 

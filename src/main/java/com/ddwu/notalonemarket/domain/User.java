@@ -32,11 +32,23 @@ public class User {
 
     private LocalDateTime deletedAt;
 
-    private LocalDateTime createAt = LocalDateTime.now();
+    @Column(name = "CREATE_AT", nullable = false, updatable = false)
+    private LocalDateTime createdAt = LocalDateTime.now();
 
     // 프로필 이미지 경로 필드 추가
     @Column(length = 500)
     private String profileImageUrl;
+    
+    public User() {
+    }
+    
+    public User(String loginId, String password, String nickname, String phoneNum, String accountNumber) {
+        this.loginId = loginId;
+        this.password = password;
+        this.nickname = nickname;
+        this.phoneNum = phoneNum;
+        this.accountNumber = accountNumber;
+    }
 
     // Getters & Setters
     public Long getUserId() {
@@ -104,11 +116,11 @@ public class User {
     }
 
     public LocalDateTime getCreateAt() {
-        return createAt;
+        return createdAt;
     }
 
     public void setCreateAt(LocalDateTime createAt) {
-        this.createAt = createAt;
+        this.createdAt = createAt;
     }
 
     public String getProfileImageUrl() {
@@ -118,4 +130,10 @@ public class User {
     public void setProfileImageUrl(String profileImageUrl) {
         this.profileImageUrl = profileImageUrl;
     }
+    
+    @PrePersist
+    public void prePersist() {
+        this.createdAt = LocalDateTime.now();
+    }
+
 }

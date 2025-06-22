@@ -28,18 +28,26 @@ public class JwtFilter extends OncePerRequestFilter {
                                     HttpServletResponse response,
                                     FilterChain filterChain)
                                     throws ServletException, IOException {
+        String path = request.getRequestURI();
+
+        // 공개 경로 예외 처리
+        if (path.equals("/thymeleaf-login") || path.startsWith("/login") ||  path.equals("/user/login") || path.equals("/user/register") || path.startsWith("/uploads")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
         String authHeader = request.getHeader("Authorization");
 
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             String token = authHeader.substring(7);
-            String loginId = jwtUtil.validateTokenAndGetLoginId(token); // 범위 확장
+            String loginId = jwtUtil.validateTokenAndGetLoginId(token);
 
             if (loginId != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                 UsernamePasswordAuthenticationToken authentication =
                     new UsernamePasswordAuthenticationToken(
                         loginId,
                         null,
-                        List.of(new SimpleGrantedAuthority("ROLE_USER")) // 권한 부여
+                        List.of(new SimpleGrantedAuthority("ROLE_USER"))
                     );
 
                 authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
@@ -49,4 +57,5 @@ public class JwtFilter extends OncePerRequestFilter {
 
         filterChain.doFilter(request, response);
     }
+
 }
