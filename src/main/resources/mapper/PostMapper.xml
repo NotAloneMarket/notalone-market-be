@@ -46,6 +46,28 @@
 	<select id="selectPostById" resultMap="postResultMap">
 	    SELECT * FROM Post WHERE id = #{id}
 	</select>
+	
+	 <select id="selectPostsByKeyword" parameterType="string" resultMap="postResultMap">
+	    SELECT * FROM Post
+	    WHERE status = 'SELLING'
+	      AND (
+	        LOWER(title) LIKE '%' || LOWER(#{keyword}) || '%'
+	        OR LOWER(description) LIKE '%' || LOWER(#{keyword}) || '%'
+	      )
+	</select>
 
+
+    <select id="selectPostsByCategory" parameterType="string" resultMap="postResultMap">
+        SELECT * FROM Post
+        WHERE category_id IN (
+            SELECT id FROM Category WHERE LOWER(name) = LOWER(#{category})
+        )
+        AND status = 'SELLING'
+    </select>
+
+    <select id="selectPostsByWriterId" parameterType="long" resultMap="postResultMap">
+        SELECT * FROM Post
+        WHERE writer_id = #{writerId}
+    </select>
 
 </mapper>
